@@ -1,0 +1,7 @@
+# ORM y Base de datos
+sqlalchemy==2.0.44
+
+
+# Validacion de datos
+pydantic==2.12.3
+

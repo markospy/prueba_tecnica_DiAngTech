@@ -17,12 +17,38 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
 - Facilita implementación del sistema de permisos en la capa de servicio
 - Estándar de la industria sin caer en sobre-ingenieria
 - Permite orquestar operaciones complejas (ejemplo: crear post + asignar tags)
+- Routers delgados = más fácil de leer
 
 **Alternativas consideradas:**
 - Layered simple: Más rápida pero mezcla lógica de negocio en routers
 - Feature-based: Buena modularidad pero relaciones entre entidades menos claras
-- Clean Architecture: Excesiva para el contexto de la prueba
+- Clean Architecture: Complejidad excesiva para el contexto de la prueba
 
 **Trade-offs aceptados:**
 - Supone un mayor timpo de desarrollo vs arquitectura simple
 - Una capa adicional de abstracción
+
+
+**Estructura previa para la arquitectura escogida**
+
+``Nota: puede ser ligeramente diferente en el proyecto.``
+
+```
+proyecto/
+├── api/
+│   └── routers/       # Solo routing
+│
+├── services/          # Lógica de negocio
+│   ├── user_service.py
+│   ├── post_service.py
+│   └── auth_service.py
+│
+├── repositories/       # Acceso a datos
+│   ├── base.py
+│   ├── user_repository.py
+│   └── post_repository.py
+│
+├── models/             # SQLAlchemy
+├── schemas/            # Pydantic
+└── core/               # Infraestructura
+```
