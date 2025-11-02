@@ -1,3 +1,7 @@
+# Aunque use uv dejo este requirements por si
+# quien clone este repositorio desaa usar pip
+
+
 # ORM y Base de datos
 sqlalchemy==2.0.44
 
