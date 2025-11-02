@@ -15,39 +15,36 @@ class RepositoryUserPostgres(RepositoryBase):
         super().__init__(session)
 
     def get_all(self) -> Optional[List[User]]:
-        with self.session as session:
-            return User.all_active(session).all()
+        return User.all_active(self.session).all()
 
     def get_by_id(self, id: int) -> Optional[User]:
-        with self.session as session:
-            return User.get_by_id(session, id)
+        return User.get_by_id(self.session, id)
 
     def create(self, schema: UserIn) -> Optional[User]:
         user = User(**schema.model_dump())
-        with self.session as session:
-            try:
-                session.add(user)
-                session.commit()
-                return user
-            except IntegrityError:
-                session.rollback()
-                raise RepositoryAlreadyExistsException("User", user.username)
+        try:
+            self.session.add(user)
+            self.session.commit()
+            self.session.refresh(user)
+            return user
+        except IntegrityError:
+            self.session.rollback()
+            raise RepositoryAlreadyExistsException("User", user.username)
 
     def update(self, id: int, schema: UserPut) -> Optional[User]:
-        with self.session as session:
-            user: User | None = User.get_by_id(session, id)
-            if not user:
-                raise RepositoryNotFoundException("User", id)
-            update_user_data = schema.model_dump(exclude_unset=True)
-            update_user = user.model_copy(update=update_user_data)
-            session.add(update_user)
-            session.commit()
-            return user
+        user: User | None = User.get_by_id(self.session, id)
+        if not user:
+            raise RepositoryNotFoundException("User", id)
+        update_user_data = schema.model_dump(exclude_unset=True)
+        update_user = user.model_copy(update=update_user_data)
+        self.session.add(update_user)
+        self.session.commit()
+        self.session.refresh(update_user)
+        return update_user
 
     def delete(self, id: int) -> None:
-        with self.session as session:
-            user = User.get_by_id(session, id)
-            if not user:
-                raise RepositoryNotFoundException("User", id)
-            user.soft_delete()
-            session.commit()
+        user = User.get_by_id(self.session, id)
+        if not user:
+            raise RepositoryNotFoundException("User", id)
+        user.soft_delete()
+        self.session.commit()
