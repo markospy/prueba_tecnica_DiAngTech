@@ -1,10 +1,21 @@
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
 from api.routers.comment_router import comment_router
 from api.routers.post_router import post_router
 from api.routers.user_router import user_router
+from core.database import create_db_and_tables
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up...")
+    create_db_and_tables()
+    yield
+    print("Shutting down...")
+
 
 app = FastAPI(
     title="Prueba técnica de DiAngTech",
@@ -13,6 +24,7 @@ app = FastAPI(
     contact={"name": "Marcos Antonio Avila Morales", "email": "marcosantonioavilamorales@gmail.com"},
     license_info={"name": "MIT License", "url": "https://opensource.org/licenses/MIT"},
     docs_url="/docs",
+    lifespan=lifespan,
 )
 
 
