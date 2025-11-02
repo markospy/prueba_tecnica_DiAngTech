@@ -9,7 +9,7 @@ from repositories.repository_base import RepositoryBase
 from schemas.post import PostIn
 
 
-class RepositoryPost(RepositoryBase):
+class RepositoryPostPostgres(RepositoryBase):
 
     def __init__(self, session: Session):
         super().__init__(session)
@@ -38,12 +38,11 @@ class RepositoryPost(RepositoryBase):
             post: Post | None = Post.get_by_id(session, id)
             if not post:
                 raise RepositoryNotFoundException("Post", id)
-            stored_post_model = Post(**post.__dict__)
             update_post_data = schema.model_dump(exclude_unset=True)
-            update_post = stored_post_model.model_copy(update=update_post_data)
+            update_post = post.model_copy(update=update_post_data)
             session.add(update_post)
             session.commit()
-            return update_post
+            return post
 
     def delete(self, id: int) -> None:
         with self.session as session:
