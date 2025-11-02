@@ -52,3 +52,25 @@ proyecto/
 ├── schemas/            # Pydantic
 └── core/               # Infraestructura
 ```
+
+## 2. Primary key: UUID vs Int(Autoincrement)
+
+**Fecha:** 2025-11-01
+
+**Contexto:** Necesitaba decidir como identificar los recursos en las tablas de la base de datos.
+
+**Decisión:** Usar Autoincrement(integer).
+
+**Razones:**
+- **Sistemas Centralizados**: La aplicación usa una única base de datos (monolito) donde la generación secuencial es simple y controlada
+- **Prioridad al Rendimiento**: Se requiere la máxima velocidad en inserciones, joins e indexación (son claves naturalmente ordenadas)
+- **Legibilidad y Debugging**: Los IDs se exponen frecuentemente a usuarios internos o se usan para depuración manual (ej: "Ticket #123")
+- **Bajo Uso de Espacio**: En tablas muy grandes, el ahorro de 8 bytes por fila es significativo
+
+**Alternativas consideradas:**
+- UUID: pero no existe una necesidad imperativa de unicidad global o sistemas distribuidos
+
+**Trade-offs aceptados:**
+- No es Único Globalmente (colisiones en sistemas distribuidos)
+- Predecible (riesgo de enumeración/seguridad)
+- Depende de la base de datos para la generación
