@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
 from models.models import Post
 from repositories.exceptions import RepositoryNotFoundException
-from repositories.repository_post_memory import RepositoryPostMemory
+from repositories.post.repository_post_memory import RepositoryPostMemory
 from schemas.post import PostIn, PostPut
 from services.use_cases_post import UseCasesPost
 

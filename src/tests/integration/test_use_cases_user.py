@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
 from models.models import User
 from repositories.exceptions import RepositoryNotFoundException
-from repositories.repository_user_memory import RepositoryUserMemory
+from repositories.user.repository_user_memory import RepositoryUserMemory
 from schemas.user import UserIn, UserPut
 from services.use_cases_user import UseCasesUser
 

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from models.models import User
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
 from repositories.repository_base import RepositoryBase
-from schemas.user import UserIn
+from schemas.user import UserIn, UserPut
 
 
 class RepositoryUserPostgres(RepositoryBase):
@@ -33,7 +33,7 @@ class RepositoryUserPostgres(RepositoryBase):
                 session.rollback()
                 raise RepositoryAlreadyExistsException("User", user.username)
 
-    def update(self, id: int, schema: UserIn) -> Optional[User]:
+    def update(self, id: int, schema: UserPut) -> Optional[User]:
         with self.session as session:
             user: User | None = User.get_by_id(session, id)
             if not user:
