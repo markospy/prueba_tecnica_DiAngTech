@@ -7,7 +7,16 @@ from models.mixins import SoftDeleteMixin, TimestampMixin
 
 
 class Base(DeclarativeBase):
-    pass
+    __abstract__ = True  # parametro para indicar que es una clase abstracta
+
+    @classmethod
+    def all_active(cls, session):
+        """Query personalizado para obtener solo elementos no eliminados. (soft delete)"""
+        return session.query(cls).filter(cls.deleted_at.is_(None))
+
+    @classmethod
+    def get_by_id(cls, session, id):
+        return session.query(cls).filter(cls.id == id, cls.deleted_at.is_(None)).first()
 
 
 class User(TimestampMixin, SoftDeleteMixin, Base):
