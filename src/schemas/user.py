@@ -7,11 +7,10 @@ class UserBase(BaseModel):
     username: str = Field(..., min_length=1, max_length=30)
     fullname: str = Field(..., min_length=1, max_length=30)
     email: str = Field(..., min_length=1, max_length=30)
-    password: str = Field(..., min_length=1, max_length=30)
 
 
 class UserIn(UserBase):
-    pass
+    password: str = Field(..., min_length=1, max_length=30)
 
 
 class UserPut(BaseModel):
