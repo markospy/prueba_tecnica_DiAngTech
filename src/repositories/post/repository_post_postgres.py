@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.models import Post
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
@@ -11,40 +11,50 @@ from schemas.post import PostIn, PostPut
 
 class RepositoryPostPostgres(RepositoryBase):
 
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    def get_all(self) -> Optional[List[Post]]:
-        return Post.all_active(self.session).all()
+    async def get_all(self) -> Optional[List[Post]]:
+        result = await Post.all_active(self.session)
+        if not result:
+            raise RepositoryNotFoundException("Post", "all")
+        return result
 
-    def get_by_id(self, id: int) -> Optional[Post]:
-        return Post.get_by_id(self.session, id)
+    async def get_by_id(self, id: int) -> Optional[Post]:
+        post = await Post.get_by_id(self.session, id)
+        if not post:
+            raise RepositoryNotFoundException("Post", id)
+        return post
 
-    def create(self, schema: PostIn) -> Optional[Post]:
+    async def create(self, schema: PostIn) -> Optional[Post]:
         post = Post(**schema.model_dump())
         try:
             self.session.add(post)
-            self.session.commit()
-            self.session.refresh(post)
+            await self.session.commit()
+            await self.session.refresh(post)
             return post
         except IntegrityError:
-            self.session.rollback()
+            await self.session.rollback()
             raise RepositoryAlreadyExistsException("Post", post.title)
 
-    def update(self, id: int, schema: PostPut) -> Optional[Post]:
-        post: Post | None = Post.get_by_id(self.session, id)
+    async def update(self, id: int, schema: PostPut) -> Optional[Post]:
+        post: Post | None = await Post.get_by_id(self.session, id)
         if not post:
             raise RepositoryNotFoundException("Post", id)
         update_post_data = schema.model_dump(exclude_unset=True)
         update_post = post.model_copy(update=update_post_data)
         self.session.add(update_post)
-        self.session.commit()
-        self.session.refresh(update_post)
-        return update_post
+        try:
+            await self.session.commit()
+            await self.session.refresh(update_post)
+            return update_post
+        except IntegrityError:
+            await self.session.rollback()
+            raise RepositoryAlreadyExistsException("Post", update_post.title)
 
-    def delete(self, id: int) -> None:
-        post = Post.get_by_id(self.session, id)
+    async def delete(self, id: int) -> None:
+        post: Post | None = await Post.get_by_id(self.session, id)
         if not post:
             raise RepositoryNotFoundException("Post", id)
         post.soft_delete()
-        self.session.commit()
+        await self.session.commit()

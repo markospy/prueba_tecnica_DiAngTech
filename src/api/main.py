@@ -13,7 +13,7 @@ from core.database import create_db_and_tables
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up...")
-    create_db_and_tables()
+    await create_db_and_tables()
     yield
     print("Shutting down...")
 

@@ -1,22 +1,29 @@
-from typing import List
+from datetime import datetime
+from typing import Any, List
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from models.mixins import SoftDeleteMixin, TimestampMixin
 
 
 class Base(DeclarativeBase):
-    __abstract__ = True  # parametro para indicar que es una clase abstracta
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     @classmethod
-    def all_active(cls, session):
+    async def all_active(cls, session: AsyncSession):
         """Query personalizado para obtener solo elementos no eliminados. (soft delete)"""
-        return session.query(cls).filter(cls.deleted_at.is_(None))
+        result = await session.execute(select(cls).where(cls.deleted_at.is_(None)))
+        return result.scalars().all()
 
     @classmethod
-    def get_by_id(cls, session, id):
-        return session.query(cls).filter(cls.id == id, cls.deleted_at.is_(None)).first()
+    async def get_by_id(cls, session: AsyncSession, id: int) -> Any:
+        result = await session.execute(select(cls).where(cls.id == id, cls.deleted_at.is_(None)))
+        return result.scalar()
 
 
 class User(TimestampMixin, SoftDeleteMixin, Base):

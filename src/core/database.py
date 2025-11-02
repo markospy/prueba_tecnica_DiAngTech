@@ -1,21 +1,23 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from models.models import Base
 
-engine = create_engine("sqlite+pysqlite:///database.sqlite3", echo=False)
+ASYNC_DATABASE_URL = "sqlite+aiosqlite:///database.sqlite3"
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+async_engine = create_async_engine(ASYNC_DATABASE_URL, echo=False)
+
+AsyncSessionLocal = async_sessionmaker(
+    async_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 
-def create_db_and_tables():
-    Base.metadata.create_all(engine)
+async def create_db_and_tables():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
-def get_session() -> Session:
-    """Función de dependencia para obtener una sesión de base de datos"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_async_session():
+    async with AsyncSessionLocal() as session:
+        yield session
