@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
+from api.exception_handlers import register_repository_exception_handlers
 from api.routers.comment_router import comment_router
 from api.routers.post_router import post_router
 from api.routers.user_router import user_router
@@ -26,6 +27,8 @@ app = FastAPI(
     docs_url="/docs",
     lifespan=lifespan,
 )
+
+register_repository_exception_handlers(app)
 
 
 @app.middleware("http")
