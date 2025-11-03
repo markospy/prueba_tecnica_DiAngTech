@@ -1,9 +1,13 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.security import get_current_user
 from core.database import get_async_session
 from repositories.user.repository_user_postgres import RepositoryUserPostgres
-from schemas.user import UserIn, UserOut, UserPut
+from schemas.security import User
+from schemas.user import UserOut, UserPut
 from services.use_cases_user import UseCasesUser
 
 user_router = APIRouter(prefix="/users", tags=["users"])
@@ -15,34 +19,35 @@ async def get_use_cases_user(session: AsyncSession = Depends(get_async_session))
     return UseCasesUser(repository=repository)
 
 
-@user_router.post("/", response_model=UserOut)
-async def create_user(
-    user: UserIn,
-    use_cases_user: UseCasesUser = Depends(get_use_cases_user),
-):
-    return await use_cases_user.create_user(user)
-
-
 @user_router.get("/{id}", response_model=UserOut)
 async def get_user(
     id: int,
     use_cases_user: UseCasesUser = Depends(get_use_cases_user),
 ):
+    """
+    Get the user by id
+    """
     return await use_cases_user.get_user(id)
 
 
-@user_router.put("/{id}", response_model=UserOut)
+@user_router.put("/", response_model=UserOut)
 async def update_user(
-    id: int,
     user: UserPut,
+    current_user: Annotated[User, Depends(get_current_user)],
     use_cases_user: UseCasesUser = Depends(get_use_cases_user),
 ):
-    return await use_cases_user.update_user(id, user)
+    """
+    Update the current user
+    """
+    return await use_cases_user.update_user(current_user.id, user)
 
 
-@user_router.delete("/{id}")
+@user_router.delete("/")
 async def delete_user(
-    id: int,
+    current_user: Annotated[User, Depends(get_current_user)],
     use_cases_user: UseCasesUser = Depends(get_use_cases_user),
 ):
-    await use_cases_user.delete_user(id)
+    """
+    Delete the current user
+    """
+    await use_cases_user.delete_user(current_user.id)

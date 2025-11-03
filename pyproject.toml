@@ -12,6 +12,10 @@ dependencies = [
     "pytest-asyncio>=1.2.0",
     "pytest>=8.4.2",
     "sqlalchemy[asyncio]>=2.0.44",
+    "python-multipart>=0.0.20",
+    "pyjwt>=2.10.1",
+    "passlib[bcrypt]>=1.7.4",
+    "pwdlib[argon2]>=0.3.0",
 ]
 
 [dependency-groups]

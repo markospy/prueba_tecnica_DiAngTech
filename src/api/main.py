@@ -6,6 +6,8 @@ from fastapi import FastAPI, Request
 from api.exception_handlers import register_repository_exception_handlers
 from api.routers.comment_router import comment_router
 from api.routers.post_router import post_router
+from api.routers.register_login import app_security
+from api.routers.tag_router import tag_router
 from api.routers.user_router import user_router
 from core.database import create_db_and_tables
 
@@ -44,3 +46,5 @@ async def add_process_time_header(request: Request, call_next):
 app.include_router(user_router)
 app.include_router(post_router)
 app.include_router(comment_router)
+app.include_router(tag_router)
+app.include_router(app_security)

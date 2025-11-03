@@ -3,9 +3,11 @@ from typing import List, Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.security import get_by_username, get_password_hash, verify_password
 from models.models import User
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
 from repositories.repository_base import RepositoryBase
+from schemas.security import UserInDB
 from schemas.user import UserIn, UserPut
 
 
@@ -27,7 +29,9 @@ class RepositoryUserPostgres(RepositoryBase):
         return user
 
     async def create(self, schema: UserIn) -> Optional[User]:
-        user = User(**schema.model_dump())
+        user_dict = schema.model_dump()
+        user_dict["password"] = get_password_hash(schema.password)
+        user = User(**user_dict)
         try:
             self.session.add(user)
             await self.session.commit()
@@ -54,3 +58,11 @@ class RepositoryUserPostgres(RepositoryBase):
             raise RepositoryNotFoundException("User", id)
         user.soft_delete()
         await self.session.commit()
+
+    async def authenticate_user(self, username: str, password: str) -> UserInDB:
+        user: UserInDB | None = await get_by_username(self.session, username)
+        if not user:
+            return None
+        if verify_password(password, user.hashed_password):
+            return user
+        return None
