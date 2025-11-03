@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
 
 import jwt
-from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
@@ -14,8 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_async_session
 from models.models import User
 from schemas.security import TokenData, UserInDB
-
-load_dotenv("dev.env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
