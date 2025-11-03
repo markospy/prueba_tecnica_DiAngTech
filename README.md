@@ -1,6 +1,30 @@
-Durante el desarrollo trabajé en un entorno local, prescindí Docker. Así que  la configuracion de desarrollo es para despliegue del entorno local sin usar docker.
+Durante el desarrollo trabajé en un entorno local, por lo que la configuracion de desarrollo es para despliegue del entorno local sin usar docker.
 
-Para el despliegue si use docker y también explicó los pasos que seguí.
+Para el despliegue si use docker, explicó los pasos que seguí.
+
+## ✅ CHECKLIST FINAL
+
+### Requisitos Obligatorios
+- ✅ Entidad principal (User) + 2 secundarias (Post, Comment)
+- ✅ Relación uno a muchos (User → Post, Post → Comment)
+- ✅ Relación muchos a muchos (Post ↔ Tag)
+- ✅ Migraciones incrementales con Alembic
+- ✅ Operaciones asíncronas con AsyncSession
+- ✅ Soft-delete con mixin
+- ✅ Query personalizado filtrando deleted
+- ✅ Timestamps genéricos (created_at, updated_at)
+- ✅ OAuth2 + JWT
+- ✅ Endpoints protegidos
+- ✅ Registro + Login
+- ✅ Routers separados por entidad
+- ✅ Middleware de tiempo de respuesta
+
+### Extras Opcionales
+- ✅ Paginación (offset/limit)
+- ✅ Validaciones Pydantic (EmailStr + validators)
+- ✅ Docker (multi-stage, optimizado)
+- ✅ Sistema de permisos (owner-only)
+- ✅ DECISIONS.md profesional
 
 ## Preparar entorno virtual con uv (en linux) para desarrollo (sin docker):
 
@@ -39,7 +63,6 @@ export ACCESS_TOKEN_EXPIRE_MINUTES=25200
 
 docker compose up
 ```
-
 
 ## 📊 Decisiones Técnicas
 
