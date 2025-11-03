@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: diangtech_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-diangtech_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - diangtech_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diangtech_app
+    environment:
+      # Base de datos PostgreSQL
+      ASYNC_DATABASE_URL: ${ASYNC_DATABASE_URL:-postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-diangtech_db}}
+      # Seguridad
+      SECRET_KEY: ${SECRET_KEY:-0aa70dd7899111cd13c90ee18ac26318241c9457a14d1cef7e302abe4c259b99}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-25200}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Se podria montar el codigo para desarrollo, sin embargo no use docker para desarrollo
+      # - ./src:/app/src
+      # - ./alembic:/app/alembic
+      # Para producción, solo montar el archivo .env si es necesario
+      - ./dev.env:/app/dev.env:ro
+    networks:
+      - diangtech_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  diangtech_network:
+    driver: bridge
+

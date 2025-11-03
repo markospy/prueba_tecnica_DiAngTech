@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Database
+*.sqlite3
+*.db
+
+# Environment
+.env
+*.env.local
+.dev.env
+
+# Documentation
+*.md
+DECISIONS.md
+
+# Tests
+tests/
+.pytest_cache/
+
+# Alembic migrations (opcional - descomentar si no quieres incluir migraciones)
+# alembic/
+
+# OS
+.DS_Store
+Thumbs.db
