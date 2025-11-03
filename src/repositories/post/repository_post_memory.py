@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from models.models import Post
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
@@ -7,21 +7,24 @@ from schemas.post import PostIn, PostPut
 
 
 class RepositoryPostMemory(RepositoryBase):
-    def __init__(self, posts: dict[int, Post] = {}):
-        self.posts: dict[int, Post] = posts
+    def __init__(self, posts: dict[int, Post] = None, session=None):
+        # Los repositorios en memoria no necesitan sesión real
+        super().__init__(session=session)
+        self.posts: dict[int, Post] = posts if posts is not None else {}
         self.id_counter = 0
 
-    def get_all(self) -> dict[int, Post]:
-        return self.posts
+    async def get_all(self) -> Optional[List[Post]]:
+        return list(self.posts.values())
 
-    def get_by_id(self, id: int) -> Optional[Post]:
+    async def get_by_id(self, id: int) -> Optional[Post]:
         post = self.posts.get(id)
         if not post:
             raise RepositoryNotFoundException("Post", id)
         return post
 
-    def create(self, post: PostIn) -> Optional[Post]:
-        if self.get_by_title(post.title):
+    async def create(self, post: PostIn) -> Optional[Post]:
+        existing_post = await self.get_by_title(post.title)
+        if existing_post:
             raise RepositoryAlreadyExistsException("Post", post.title)
         post_in_dict = post.model_dump()
         post_in_dict["id"] = self.increment_id_counter()
@@ -29,7 +32,7 @@ class RepositoryPostMemory(RepositoryBase):
         self.posts[post_model.id] = post_model
         return post_model
 
-    def update(self, id: int, post: PostPut) -> Optional[Post]:
+    async def update(self, id: int, post: PostPut) -> Optional[Post]:
         stored_post = self.posts.get(id)
         if not stored_post:
             raise RepositoryNotFoundException("Post", id)
@@ -41,7 +44,7 @@ class RepositoryPostMemory(RepositoryBase):
 
         return stored_post
 
-    def delete(self, id: int) -> None:
+    async def delete(self, id: int) -> None:
         if not self.posts.get(id):
             raise RepositoryNotFoundException("Post", id)
         self.posts[id].soft_delete()
@@ -50,5 +53,5 @@ class RepositoryPostMemory(RepositoryBase):
         self.id_counter += 1
         return self.id_counter
 
-    def get_by_title(self, title: str) -> Optional[Post]:
+    async def get_by_title(self, title: str) -> Optional[Post]:
         return next((post for post in self.posts.values() if post.title == title), None)

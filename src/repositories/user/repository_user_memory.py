@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from models.models import User
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
@@ -7,21 +7,23 @@ from schemas.user import UserIn, UserPut
 
 
 class RepositoryUserMemory(RepositoryBase):
-    def __init__(self, users: dict[int, User] = {}):
-        self.users: dict[int, User] = users
-        self.id_counter = 0
+    def __init__(self, users: dict[int, User] = None, session=None):
+        super().__init__(session=session)
+        self.users: dict[int, User] = users if users is not None else {}
+        self.id_counter = 1
 
-    def get_all(self) -> dict[int, User]:
-        return self.users
+    async def get_all(self) -> Optional[List[User]]:
+        return list(self.users.values())
 
-    def get_by_id(self, id: int) -> Optional[User]:
+    async def get_by_id(self, id: int) -> Optional[User]:
         user = self.users.get(id)
         if not user:
             raise RepositoryNotFoundException("User", id)
         return user
 
-    def create(self, user: UserIn) -> Optional[User]:
-        if self.get_by_username(user.username):
+    async def create(self, user: UserIn) -> Optional[User]:
+        existing_user = await self.get_by_username(user.username)
+        if existing_user:
             raise RepositoryAlreadyExistsException("User", user.username)
         user_in_dict = user.model_dump()
         user_in_dict["id"] = self.increment_id_counter()
@@ -29,7 +31,7 @@ class RepositoryUserMemory(RepositoryBase):
         self.users[user_model.id] = user_model
         return user_model
 
-    def update(self, id: int, user: UserPut) -> Optional[User]:
+    async def update(self, id: int, user: UserPut) -> Optional[User]:
         stored_user = self.users.get(id)
         if not stored_user:
             raise RepositoryNotFoundException("User", id)
@@ -41,7 +43,7 @@ class RepositoryUserMemory(RepositoryBase):
 
         return stored_user
 
-    def delete(self, id: int) -> None:
+    async def delete(self, id: int) -> None:
         if not self.users.get(id):
             raise RepositoryNotFoundException("User", id)
         self.users[id].soft_delete()
@@ -50,5 +52,5 @@ class RepositoryUserMemory(RepositoryBase):
         self.id_counter += 1
         return self.id_counter
 
-    def get_by_username(self, username: str) -> Optional[User]:
+    async def get_by_username(self, username: str) -> Optional[User]:
         return next((user for user in self.users.values() if user.username == username), None)

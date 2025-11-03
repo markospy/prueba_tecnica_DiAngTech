@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from models.models import Comment
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
@@ -7,20 +7,22 @@ from schemas.comment import CommentIn, CommentPut
 
 
 class RepositoryCommentMemory(RepositoryBase):
-    def __init__(self, comments: dict[int, Comment] = {}):
-        self.comments: dict[int, Comment] = comments
-        self.id_counter = 0
+    def __init__(self, comments: dict[int, Comment] = None, session=None):
+        # Los repositorios en memoria no necesitan sesión real
+        super().__init__(session=session)
+        self.comments: dict[int, Comment] = comments if comments is not None else {}
+        self.id_counter = 1
 
-    def get_all(self) -> dict[int, Comment]:
-        return self.comments
+    async def get_all(self) -> Optional[List[Comment]]:
+        return list(self.comments.values())
 
-    def get_by_id(self, id: int) -> Optional[Comment]:
+    async def get_by_id(self, id: int) -> Optional[Comment]:
         comment = self.comments.get(id)
         if not comment:
             raise RepositoryNotFoundException("Comment", id)
         return comment
 
-    def create(self, comment: CommentIn) -> Optional[Comment]:
+    async def create(self, comment: CommentIn) -> Optional[Comment]:
         if self.get_by_content(comment.content):
             raise RepositoryAlreadyExistsException("Comment", comment.content)
         comment_in_dict = comment.model_dump()
@@ -29,7 +31,7 @@ class RepositoryCommentMemory(RepositoryBase):
         self.comments[comment_model.id] = comment_model
         return comment_model
 
-    def update(self, id: int, comment: CommentPut) -> Optional[Comment]:
+    async def update(self, id: int, comment: CommentPut) -> Optional[Comment]:
         stored_comment = self.comments.get(id)
         if not stored_comment:
             raise RepositoryNotFoundException("Comment", id)
@@ -41,7 +43,7 @@ class RepositoryCommentMemory(RepositoryBase):
 
         return stored_comment
 
-    def delete(self, id: int) -> None:
+    async def delete(self, id: int) -> None:
         if not self.comments.get(id):
             raise RepositoryNotFoundException("Comment", id)
         self.comments[id].soft_delete()
