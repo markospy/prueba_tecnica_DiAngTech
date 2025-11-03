@@ -32,7 +32,17 @@ def user_put():
 
 @pytest.fixture
 def use_cases_user_with_data():
-    memory_db = {1: User(id=1, username="Test User", fullname="Test User", email="test@test.com", password="password")}
+    memory_db = {
+        1: User(
+            id=1,
+            username="Test User",
+            fullname="Test User",
+            email="test@test.com",
+            password="password",
+            bio=None,
+            avatar=None,
+        )
+    }
     repository = RepositoryUserMemory(memory_db)
     return UseCasesUser(repository)
 
@@ -42,7 +52,7 @@ async def test_create_user(use_cases_user: UseCasesUser, user: UserIn):
     user_model = await use_cases_user.create_user(user)
     assert user_model.username == "Test User"
     assert user_model.fullname == "Test User"
-    assert user_model.id == 2
+    assert user_model.id == 1
 
 
 @pytest.mark.user

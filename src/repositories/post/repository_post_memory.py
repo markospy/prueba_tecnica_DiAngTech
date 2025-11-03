@@ -7,10 +7,9 @@ from schemas.post import PostIn, PostPut
 
 
 class RepositoryPostMemory(RepositoryBase):
-    def __init__(self, posts: dict[int, Post] = None, session=None):
-        # Los repositorios en memoria no necesitan sesión real
+    def __init__(self, posts: dict[int, Post] = {}, session=None):
         super().__init__(session=session)
-        self.posts: dict[int, Post] = posts if posts is not None else {}
+        self.posts: dict[int, Post] = posts
         self.id_counter = 0
 
     async def get_all(self) -> Optional[List[Post]]:

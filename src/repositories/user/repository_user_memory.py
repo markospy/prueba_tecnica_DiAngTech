@@ -7,10 +7,10 @@ from schemas.user import UserIn, UserPut
 
 
 class RepositoryUserMemory(RepositoryBase):
-    def __init__(self, users: dict[int, User] = None, session=None):
+    def __init__(self, users: dict[int, User] = {}, session=None):
         super().__init__(session=session)
-        self.users: dict[int, User] = users if users is not None else {}
-        self.id_counter = 1
+        self.users: dict[int, User] = users
+        self.id_counter = 0
 
     async def get_all(self) -> Optional[List[User]]:
         return list(self.users.values())

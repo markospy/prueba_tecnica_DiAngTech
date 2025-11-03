@@ -7,11 +7,10 @@ from schemas.comment import CommentIn, CommentPut
 
 
 class RepositoryCommentMemory(RepositoryBase):
-    def __init__(self, comments: dict[int, Comment] = None, session=None):
-        # Los repositorios en memoria no necesitan sesión real
+    def __init__(self, comments: dict[int, Comment] = {}, session=None):
         super().__init__(session=session)
-        self.comments: dict[int, Comment] = comments if comments is not None else {}
-        self.id_counter = 1
+        self.comments: dict[int, Comment] = comments
+        self.id_counter = 0
 
     async def get_all(self) -> Optional[List[Comment]]:
         return list(self.comments.values())
