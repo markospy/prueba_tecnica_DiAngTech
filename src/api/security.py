@@ -53,7 +53,7 @@ async def get_by_username(session: AsyncSession, username: str) -> Optional[User
     user = result.scalar()
     if not user:
         return None
-    return UserInDB(username=user.username, hashed_password=user.password)
+    return UserInDB(id=user.id, username=user.username, hashed_password=user.password)
 
 
 async def get_current_user(
