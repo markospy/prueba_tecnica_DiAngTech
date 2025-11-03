@@ -1,9 +1,11 @@
 from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from models.models import Post
+from models.models import Comment, Post, Tag
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
 from repositories.repository_base import RepositoryBase
 from schemas.post import PostIn, PostPut
@@ -15,45 +17,133 @@ class RepositoryPostPostgres(RepositoryBase):
         super().__init__(session)
 
     async def get_all(self) -> Optional[List[Post]]:
-        result = await Post.all_active(self.session)
-        if not result:
-            raise RepositoryNotFoundException("Post", "all")
-        return result
+        result = await self.session.execute(
+            select(Post)
+            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .where(Post.deleted_at.is_(None))
+        )
+        posts = result.unique().scalars().all()
+        if not posts:
+            raise RepositoryNotFoundException(message="No posts found")
+        return posts
 
     async def get_by_id(self, id: int) -> Optional[Post]:
-        post = await Post.get_by_id(self.session, id)
+        result = await self.session.execute(
+            select(Post)
+            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .where(Post.id == id, Post.deleted_at.is_(None))
+        )
+        post = result.unique().scalar_one_or_none()
         if not post:
             raise RepositoryNotFoundException("Post", id)
         return post
 
-    async def create(self, schema: PostIn) -> Optional[Post]:
-        post = Post(**schema.model_dump())
+    async def get_by_user_id(self, user_id: int) -> Optional[List[Post]]:
+        result = await self.session.execute(
+            select(Post)
+            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .where(Post.user_id == user_id, Post.deleted_at.is_(None))
+        )
+        posts = result.unique().scalars().all()
+        if not posts:
+            raise RepositoryNotFoundException(message=f"No posts found for user {user_id}")
+        return posts
+
+    async def get_by_tag(self, tag: str) -> Optional[List[Post]]:
+        result = await self.session.execute(
+            select(Post)
+            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .where(Tag.name.ilike(f"%{tag}%"), Post.deleted_at.is_(None))
+        )
+        posts = result.unique().scalars().all()
+        if not posts:
+            raise RepositoryNotFoundException(message=f"No posts found for tag {tag}")
+        return posts
+
+    async def create(self, schema: PostIn, user_id: int) -> Optional[Post]:
+        tags = []
+        if schema.tags:
+            for tag_name in schema.tags:
+                tag = await Tag.get_by_name(self.session, tag_name)
+                if tag:
+                    tags.append(tag)
+                else:
+                    try:
+                        tag = Tag(name=tag_name)
+                        self.session.add(tag)
+                        tags.append(tag)
+                    except (
+                        IntegrityError
+                    ):  # Puede ocurrir que justo en ese instante otro proceso haya creado el tag(concurrency issue)
+                        tags.append(tag)
+        post = Post(**schema.model_dump(exclude={"tags"}), user_id=user_id, tags=tags)
         try:
             self.session.add(post)
             await self.session.commit()
-            await self.session.refresh(post)
+            await self.session.refresh(post, attribute_names=["id", "created_at", "updated_at"])
+            # Recargar con las relaciones
+            result = await self.session.execute(
+                select(Post)
+                .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+                .where(Post.id == post.id)
+            )
+            post = result.unique().scalar_one()
             return post
         except IntegrityError:
             await self.session.rollback()
             raise RepositoryAlreadyExistsException("Post", post.title)
 
     async def update(self, id: int, schema: PostPut) -> Optional[Post]:
-        post: Post | None = await Post.get_by_id(self.session, id)
+        result = await self.session.execute(
+            select(Post)
+            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .where(Post.id == id, Post.deleted_at.is_(None))
+        )
+        post = result.unique().scalar_one_or_none()
         if not post:
             raise RepositoryNotFoundException("Post", id)
-        update_post_data = schema.model_dump(exclude_unset=True)
-        update_post = post.model_copy(update=update_post_data)
-        self.session.add(update_post)
+        update_post_data = schema.model_dump(exclude_unset=True, exclude={"tags"})
+
+        # Actualizar campos simples
+        for key, value in update_post_data.items():
+            setattr(post, key, value)
+
+        # Manejar tags si están presentes
+        if schema.tags is not None:
+            tags = []
+            for tag_name in schema.tags:
+                tag = await Tag.get_by_name(self.session, tag_name)
+                if tag:
+                    tags.append(tag)
+                else:
+                    try:
+                        tag = Tag(name=tag_name)
+                        self.session.add(tag)
+                        tags.append(tag)
+                    except (
+                        IntegrityError
+                    ):  # Puede ocurrir que justo en ese instante otro proceso haya creado el tag(concurrency issue)
+                        tags.append(tag)
+            post.tags = tags
+
         try:
             await self.session.commit()
-            await self.session.refresh(update_post)
-            return update_post
+            await self.session.refresh(post, attribute_names=["updated_at"])
+            # Recargar con las relaciones
+            result = await self.session.execute(
+                select(Post)
+                .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+                .where(Post.id == post.id)
+            )
+            post = result.unique().scalar_one()
+            return post
         except IntegrityError:
             await self.session.rollback()
-            raise RepositoryAlreadyExistsException("Post", update_post.title)
+            raise RepositoryAlreadyExistsException("Post", post.title)
 
     async def delete(self, id: int) -> None:
-        post: Post | None = await Post.get_by_id(self.session, id)
+        result = await self.session.execute(select(Post).where(Post.id == id, Post.deleted_at.is_(None)))
+        post = result.unique().scalar_one_or_none()
         if not post:
             raise RepositoryNotFoundException("Post", id)
         post.soft_delete()

@@ -29,3 +29,10 @@ class UserOut(UserBase):
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None = None
+
+
+class UserForShowOut(BaseModel):
+    id: int
+    username: str
+    fullname: str
+    avatar: str | None = None

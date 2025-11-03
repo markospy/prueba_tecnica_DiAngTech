@@ -1,29 +1,19 @@
-from datetime import datetime
-from typing import Any, List
+from typing import List, Literal
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from models.mixins import SoftDeleteMixin, TimestampMixin
 
+JOINED_LOAD_RELATIONS = Literal[
+    "tags",
+    "comments",
+    "user",
+]
+
 
 class Base(DeclarativeBase):
-    __abstract__ = True
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
-
-    @classmethod
-    async def all_active(cls, session: AsyncSession):
-        """Query personalizado para obtener solo elementos no eliminados. (soft delete)"""
-        result = await session.execute(select(cls).where(cls.deleted_at.is_(None)))
-        return result.scalars().all()
-
-    @classmethod
-    async def get_by_id(cls, session: AsyncSession, id: int) -> Any:
-        result = await session.execute(select(cls).where(cls.id == id, cls.deleted_at.is_(None)))
-        return result.scalar()
+    pass
 
 
 class User(TimestampMixin, SoftDeleteMixin, Base):

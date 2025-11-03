@@ -28,7 +28,7 @@ async def create_post(
     """
     Create a new post
     """
-    return await use_cases_post.create_post(post)
+    return await use_cases_post.create_post(post, current_user.id)
 
 
 @post_router.get("/", response_model=List[PostOut])
@@ -50,6 +50,28 @@ async def get_post(
     Get the post by id
     """
     return await use_cases_post.get_post(id)
+
+
+@post_router.get("/user/{user_id}", response_model=List[PostOut])
+async def get_posts_by_user(
+    user_id: int,
+    use_cases_post: UseCasesPost = Depends(get_use_cases_post),
+):
+    """
+    Get the posts by user id
+    """
+    return await use_cases_post.get_posts_by_user(user_id)
+
+
+@post_router.get("/tag/{tag}", response_model=List[PostOut])
+async def get_posts_by_tag(
+    tag: str,
+    use_cases_post: UseCasesPost = Depends(get_use_cases_post),
+):
+    """
+    Get the posts by tag
+    """
+    return await use_cases_post.get_posts_by_tag(tag)
 
 
 @post_router.put("/{id}", response_model=PostOut)

@@ -9,8 +9,8 @@ class UseCasesPost:
     def __init__(self, repository: RepositoryBase):
         self.repository = repository
 
-    async def create_post(self, post: PostIn) -> Post:
-        return await self.repository.create(post)
+    async def create_post(self, post: PostIn, user_id: int) -> Post:
+        return await self.repository.create(post, user_id)
 
     async def get_post(self, id: int) -> Post:
         return await self.repository.get_by_id(id)
@@ -23,3 +23,9 @@ class UseCasesPost:
 
     async def delete_post(self, id: int) -> None:
         await self.repository.delete(id)
+
+    async def get_posts_by_user(self, user_id: int) -> List[Post]:
+        return await self.repository.get_by_user_id(user_id)
+
+    async def get_posts_by_tag(self, tag: str) -> List[Post]:
+        return await self.repository.get_by_tag(tag)
