@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -16,16 +16,24 @@ class RepositoryPostPostgres(RepositoryBase):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def get_all(self) -> Optional[List[Post]]:
-        result = await self.session.execute(
+    async def get_all(self, page: int, size: int) -> tuple[List[Post], int]:
+        skip = (page - 1) * size
+        base_query = (
             select(Post)
             .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
             .where(Post.deleted_at.is_(None))
         )
+
+        # Count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total = await self.session.scalar(count_query)
+
+        # Items
+        query = base_query.offset(skip).limit(size).order_by(Post.created_at.desc())
+        result = await self.session.execute(query)
         posts = result.unique().scalars().all()
-        if not posts:
-            raise RepositoryNotFoundException(message="No posts found")
-        return posts
+
+        return posts, total
 
     async def get_by_id(self, id: int) -> Optional[Post]:
         result = await self.session.execute(

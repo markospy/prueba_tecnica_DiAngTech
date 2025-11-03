@@ -1,11 +1,13 @@
+import math
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.security import get_current_user
 from core.database import get_async_session
 from repositories.post.repository_post_postgres import RepositoryPostPostgres
+from schemas.pagination import PaginatedResponse
 from schemas.post import PostIn, PostOut, PostPut
 from schemas.security import User
 from services.use_cases_post import UseCasesPost
@@ -31,14 +33,27 @@ async def create_post(
     return await use_cases_post.create_post(post, current_user.id)
 
 
-@post_router.get("/", response_model=List[PostOut])
+@post_router.get("/", response_model=PaginatedResponse[PostOut])
 async def get_all_posts(
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
     use_cases_post: UseCasesPost = Depends(get_use_cases_post),
 ):
     """
     Get all posts
+
+    - **page**: Number of page (starts at 1)
+    - **size**: Number of items per page (maximum 100)
     """
-    return await use_cases_post.get_all_posts()
+    items, total = await use_cases_post.get_all_posts(page=page, size=size)
+
+    return PaginatedResponse(
+        items=items,
+        total=total,
+        page=page,
+        size=size,
+        pages=math.ceil(total / size) if total > 0 else 0,
+    )
 
 
 @post_router.get("/{id}", response_model=PostOut)
@@ -84,7 +99,7 @@ async def update_post(
     """
     Update the post by id if the user is the owner of the post
     """
-    return await use_cases_post.update_post(id, post)
+    return await use_cases_post.update_post(id, post, current_user.id)
 
 
 @post_router.delete("/{id}")
@@ -96,4 +111,4 @@ async def delete_post(
     """
     Delete the post by id if the user is the owner of the post
     """
-    await use_cases_post.delete_post(id)
+    await use_cases_post.delete_post(id, current_user.id)
