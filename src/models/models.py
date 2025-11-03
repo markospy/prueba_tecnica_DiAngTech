@@ -32,6 +32,8 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
     fullname: Mapped[str] = mapped_column(String(30), nullable=False)
+    bio: Mapped[str] = mapped_column(String(500), nullable=True)
+    avatar: Mapped[str] = mapped_column(String(200), nullable=True)
     email: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(30), nullable=False)
     posts: Mapped[List["Post"]] = relationship(back_populates="user")

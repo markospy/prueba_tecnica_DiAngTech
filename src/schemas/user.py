@@ -7,6 +7,8 @@ class UserBase(BaseModel):
     username: str = Field(..., min_length=1, max_length=30)
     fullname: str = Field(..., min_length=1, max_length=30)
     email: str = Field(..., min_length=1, max_length=30)
+    bio: str | None = Field(None, min_length=1, max_length=500)
+    avatar: str | None = Field(None, min_length=1, max_length=200)
 
 
 class UserIn(UserBase):
@@ -18,6 +20,8 @@ class UserPut(BaseModel):
     fullname: str | None = Field(None, min_length=1, max_length=30)
     email: str | None = Field(None, min_length=1, max_length=30)
     password: str | None = Field(None, min_length=1, max_length=30)
+    bio: str | None = Field(None, min_length=1, max_length=500)
+    avatar: str | None = Field(None, min_length=1, max_length=200)
 
 
 class UserOut(UserBase):
