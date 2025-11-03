@@ -8,7 +8,7 @@ class TagBase(BaseModel):
 
 
 class TagIn(TagBase):
-    pass
+    user_id: int
 
 
 class TagPut(TagBase):
@@ -17,6 +17,7 @@ class TagPut(TagBase):
 
 class TagOut(TagBase):
     id: int
+    user_id: int
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None = None

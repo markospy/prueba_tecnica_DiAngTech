@@ -27,6 +27,7 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     email: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(30), nullable=False)
     posts: Mapped[List["Post"]] = relationship(back_populates="user")
+    tags: Mapped[List["Tag"]] = relationship(back_populates="user")
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
@@ -75,6 +76,8 @@ class Tag(TimestampMixin, SoftDeleteMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    user: Mapped["User"] = relationship(back_populates="tags")
     posts: Mapped[List["Post"]] = relationship(secondary="post_tag", back_populates="tags")
 
     def __repr__(self) -> str:
