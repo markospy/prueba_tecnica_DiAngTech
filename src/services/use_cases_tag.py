@@ -9,8 +9,8 @@ class UseCasesTag:
     def __init__(self, repository: RepositoryBase):
         self.repository = repository
 
-    async def create_tag(self, tag: TagIn) -> Tag:
-        return await self.repository.create(tag)
+    async def create_tag(self, tag: TagIn, user_id: int) -> Tag:
+        return await self.repository.create(tag, user_id)
 
     async def get_tag(self, id: int) -> Tag:
         return await self.repository.get_by_id(id)
@@ -18,8 +18,8 @@ class UseCasesTag:
     async def get_all_tags(self) -> List[Tag]:
         return await self.repository.get_all()
 
-    async def update_tag(self, id: int, tag: TagPut) -> Tag:
-        return await self.repository.update(id, tag)
+    async def update_tag(self, id: int, tag: TagPut, user_id: int) -> Tag:
+        return await self.repository.update(id, tag, user_id)
 
-    async def delete_tag(self, id: int) -> None:
-        await self.repository.delete(id)
+    async def delete_tag(self, id: int, user_id: int) -> None:
+        await self.repository.delete(id, user_id)

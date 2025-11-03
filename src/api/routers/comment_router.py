@@ -23,22 +23,24 @@ async def get_use_cases_comment(session: AsyncSession = Depends(get_async_sessio
 async def create_comment(
     comment: CommentIn,
     current_user: Annotated[User, Depends(get_current_user)],
+    post_id: int,
     use_cases_comment: UseCasesComment = Depends(get_use_cases_comment),
 ):
     """
     Create a new comment
     """
-    return await use_cases_comment.create_comment(comment)
+    return await use_cases_comment.create_comment(comment, current_user.id, post_id)
 
 
 @comment_router.get("/", response_model=List[CommentOut])
 async def get_all_comments(
+    post_id: int,
     use_cases_comment: UseCasesComment = Depends(get_use_cases_comment),
 ):
     """
     Get all comments
     """
-    return await use_cases_comment.get_all_comments()
+    return await use_cases_comment.get_all_comments(post_id)
 
 
 @comment_router.get("/{id}", response_model=CommentOut)
@@ -62,7 +64,7 @@ async def update_comment(
     """
     Update the comment by id if the user is the owner of the comment
     """
-    return await use_cases_comment.update_comment(id, comment)
+    return await use_cases_comment.update_comment(id, comment, current_user.id)
 
 
 @comment_router.delete("/{id}")
@@ -74,4 +76,4 @@ async def delete_comment(
     """
     Delete the comment by id if the user is the owner of the comment
     """
-    await use_cases_comment.delete_comment(id)
+    await use_cases_comment.delete_comment(id, current_user.id)

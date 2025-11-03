@@ -9,17 +9,17 @@ class UseCasesComment:
     def __init__(self, repository: RepositoryBase):
         self.repository = repository
 
-    async def create_comment(self, comment: CommentIn) -> Comment:
-        return await self.repository.create(comment)
+    async def create_comment(self, comment: CommentIn, user_id: int, post_id: int) -> Comment:
+        return await self.repository.create(comment, user_id, post_id)
 
     async def get_comment(self, id: int) -> Comment:
         return await self.repository.get_by_id(id)
 
-    async def get_all_comments(self) -> List[Comment]:
-        return await self.repository.get_all()
+    async def get_all_comments(self, post_id: int) -> List[Comment]:
+        return await self.repository.get_all(post_id)
 
-    async def update_comment(self, id: int, comment: CommentPut) -> Comment:
-        return await self.repository.update(id, comment)
+    async def update_comment(self, id: int, comment: CommentPut, user_id: int) -> Comment:
+        return await self.repository.update(id, comment, user_id)
 
-    async def delete_comment(self, id: int) -> None:
-        await self.repository.delete(id)
+    async def delete_comment(self, id: int, user_id: int) -> None:
+        await self.repository.delete(id, user_id)

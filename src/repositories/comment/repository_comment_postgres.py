@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.models import Comment
@@ -13,29 +14,36 @@ class RepositoryCommentPostgres(RepositoryBase):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def get_all(self) -> Optional[List[Comment]]:
-        result = await Comment.all_active(self.session)
-        if not result:
-            raise RepositoryNotFoundException("Comment", "all")
-        return result
+    async def get_all(self, post_id: int) -> Optional[List[Comment]]:
+        result = await self.session.execute(
+            select(Comment).where(Comment.deleted_at.is_(None), Comment.post_id == post_id)
+        )
+        comments = result.unique().scalars().all()
+        if not comments:
+            raise RepositoryNotFoundException(f"No comments found for post with id {post_id}")
+        return comments
 
     async def get_by_id(self, id: int) -> Optional[Comment]:
-        comment = await Comment.get_by_id(self.session, id)
+        result = await self.session.execute(select(Comment).where(Comment.id == id, Comment.deleted_at.is_(None)))
+        comment = result.unique().scalar_one_or_none()
         if not comment:
             raise RepositoryNotFoundException("Comment", id)
         return comment
 
-    async def create(self, schema: CommentIn) -> Optional[Comment]:
-        comment = Comment(**schema.model_dump())
+    async def create(self, schema: CommentIn, user_id: int) -> Optional[Comment]:
+        comment = Comment(**schema.model_dump(), user_id=user_id, post_id=schema.post_id)
         self.session.add(comment)
         await self.session.commit()
         await self.session.refresh(comment)
         return comment
 
-    async def update(self, id: int, schema: CommentPut) -> Optional[Comment]:
-        comment: Comment | None = await Comment.get_by_id(self.session, id)
+    async def update(self, id: int, schema: CommentPut, user_id: int) -> Optional[Comment]:
+        result = await self.session.execute(
+            select(Comment).where(Comment.id == id, Comment.deleted_at.is_(None), Comment.user_id == user_id)
+        )
+        comment = result.unique().scalar_one_or_none()
         if not comment:
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(f"Not found comment with id {id} for the user with id {user_id}")
         update_comment_data = schema.model_dump(exclude_unset=True)
         update_comment = comment.model_copy(update=update_comment_data)
         self.session.add(update_comment)
@@ -43,9 +51,12 @@ class RepositoryCommentPostgres(RepositoryBase):
         await self.session.refresh(update_comment)
         return update_comment
 
-    async def delete(self, id: int) -> None:
-        comment: Comment | None = await Comment.get_by_id(self.session, id)
+    async def delete(self, id: int, user_id: int) -> None:
+        result = await self.session.execute(
+            select(Comment).where(Comment.id == id, Comment.deleted_at.is_(None), Comment.user_id == user_id)
+        )
+        comment = result.unique().scalar_one_or_none()
         if not comment:
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(f"Not found comment with id {id} for the user with id {user_id}")
         comment.soft_delete()
         await self.session.commit()

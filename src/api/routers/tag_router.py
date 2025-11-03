@@ -28,7 +28,7 @@ async def create_tag(
     """
     Create a new tag
     """
-    return await use_cases_tag.create_tag(tag)
+    return await use_cases_tag.create_tag(tag, current_user.id)
 
 
 @tag_router.get("/", response_model=List[TagOut])
@@ -62,7 +62,7 @@ async def update_tag(
     """
     Update the tag by id if the user is the owner of the tag
     """
-    return await use_cases_tag.update_tag(id, tag)
+    return await use_cases_tag.update_tag(id, tag, current_user.id)
 
 
 @tag_router.delete("/{id}")
@@ -74,4 +74,4 @@ async def delete_tag(
     """
     Delete the tag by id if the user is the owner of the tag
     """
-    await use_cases_tag.delete_tag(id)
+    await use_cases_tag.delete_tag(id, current_user.id)

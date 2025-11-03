@@ -14,17 +14,17 @@ class RepositoryBase(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, id: int) -> Optional[Any]:
+    async def get_by_id(self, id: int, **kwargs: Any) -> Optional[Any]:
         pass
 
     @abstractmethod
-    async def create(self, schema: Any) -> Optional[Any]:
+    async def create(self, schema: Any, **kwargs: Any) -> Optional[Any]:
         pass
 
     @abstractmethod
-    async def update(self, id: int, schema: Any) -> Optional[Any]:
+    async def update(self, id: int, schema: Any, **kwargs: Any) -> Optional[Any]:
         pass
 
     @abstractmethod
-    async def delete(self, id: int) -> None:
+    async def delete(self, id: int, **kwargs: Any) -> None:
         pass

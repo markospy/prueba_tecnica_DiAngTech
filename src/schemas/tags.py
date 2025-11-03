@@ -8,7 +8,7 @@ class TagBase(BaseModel):
 
 
 class TagIn(TagBase):
-    user_id: int
+    pass
 
 
 class TagPut(TagBase):

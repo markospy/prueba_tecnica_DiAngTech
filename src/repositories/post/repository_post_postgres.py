@@ -64,12 +64,15 @@ class RepositoryPostPostgres(RepositoryBase):
         tags = []
         if schema.tags:
             for tag_name in schema.tags:
-                tag = await Tag.get_by_name(self.session, tag_name)
+                result = await self.session.execute(select(Tag).where(Tag.name == tag_name))
+                tag = result.unique().scalar()
                 if tag:
+                    if tag.deleted_at is not None:
+                        tag.deleted_at = None
                     tags.append(tag)
                 else:
                     try:
-                        tag = Tag(name=tag_name)
+                        tag = Tag(name=tag_name, user_id=user_id)
                         self.session.add(tag)
                         tags.append(tag)
                     except (
@@ -93,15 +96,15 @@ class RepositoryPostPostgres(RepositoryBase):
             await self.session.rollback()
             raise RepositoryAlreadyExistsException("Post", post.title)
 
-    async def update(self, id: int, schema: PostPut) -> Optional[Post]:
+    async def update(self, id: int, schema: PostPut, user_id: int) -> Optional[Post]:
         result = await self.session.execute(
             select(Post)
             .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
-            .where(Post.id == id, Post.deleted_at.is_(None))
+            .where(Post.id == id, Post.deleted_at.is_(None), Post.user_id == user_id)
         )
         post = result.unique().scalar_one_or_none()
         if not post:
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(f"Not found post with id {id} for the user with id {user_id}")
         update_post_data = schema.model_dump(exclude_unset=True, exclude={"tags"})
 
         # Actualizar campos simples
@@ -117,7 +120,7 @@ class RepositoryPostPostgres(RepositoryBase):
                     tags.append(tag)
                 else:
                     try:
-                        tag = Tag(name=tag_name)
+                        tag = Tag(name=tag_name, user_id=user_id)
                         self.session.add(tag)
                         tags.append(tag)
                     except (
@@ -141,10 +144,12 @@ class RepositoryPostPostgres(RepositoryBase):
             await self.session.rollback()
             raise RepositoryAlreadyExistsException("Post", post.title)
 
-    async def delete(self, id: int) -> None:
-        result = await self.session.execute(select(Post).where(Post.id == id, Post.deleted_at.is_(None)))
+    async def delete(self, id: int, user_id: int) -> None:
+        result = await self.session.execute(
+            select(Post).where(Post.id == id, Post.deleted_at.is_(None), Post.user_id == user_id)
+        )
         post = result.unique().scalar_one_or_none()
         if not post:
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(f"Not found post with id {id} for the user with id {user_id}")
         post.soft_delete()
         await self.session.commit()
