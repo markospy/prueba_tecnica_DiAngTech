@@ -1,6 +1,17 @@
 Durante el desarrollo trabajé en un entorno local, por lo que la configuracion de desarrollo es para despliegue del entorno local sin usar docker.
 
-Para el despliegue si use docker, explicó los pasos que seguí.
+El despliegue lo realize en Render. Para esto es importante contar con los ficheros render.yaml y un dockerfile.
+
+## 📑 Índice
+
+- [✅ CHECKLIST FINAL](#-checklist-final)
+  - [Requisitos Obligatorios](#requisitos-obligatorios)
+  - [Extras Opcionales](#extras-opcionales)
+  - [Pendientes y mejoras posibles](#pendientes-y-mejoras-posibles)
+- [Preparar entorno virtual con uv (en linux) para desarrollo (sin docker)](#preparar-entorno-virtual-con-uv-en-linux-para-desarrollo-sin-docker)
+- [Desplegar API desde un contenedor de Docker](#desplegar-api-desde-un-contenedor-de-docker)
+- [Notas importantes](#notas-importantes)
+- [📊 Decisiones Técnicas](#-decisiones-técnicas)
 
 ## ✅ CHECKLIST FINAL
 
@@ -45,7 +56,7 @@ uv sync
 # Activar el entorno virtual
 source .venv/bin/activate
 
-## Declaracion de variables de entorno
+## Declaracion de variables de entorno (sqlite para prueba)
 export ASYNC_DATABASE_URL="sqlite+aiosqlite:///database.sqlite3"
 export SECRET_KEY="0aa70dd7899111cd13c90ee18ac26318241c9457a14d1cef7e302abe4c259b99"
 export ALGORITHM="HS256"
@@ -60,7 +71,7 @@ Si tienes problema al ejecutar ```fastapi dev  src/api/main.py``` puede intentar
 export PYTHONPATH=$"{PYTHONPATH}:<URL A LA RAIZ DEL DIRECTORIO DEL PROYECTO>"
 ```
 
-## Desplegar API desde un contenedor de Docker
+## Desplegar API desde un contenedor de Docker (sustituir valores de las variables)
 
 ```shell
 export POSTGRES_USER="diangtech_user"
@@ -73,6 +84,11 @@ export ACCESS_TOKEN_EXPIRE_MINUTES=25200
 
 docker compose up
 ```
+
+## Notas importantes:
+En el dockerfile uso valores hardcodeados. Estos valores funcionan para desarrollo local. En producción (Render), se sobrescriben con las variables definidas en render.yaml o en el dashboard de Render.
+
+Seguridad: Los valores sensibles (como POSTGRES_PASSWORD y SECRET_KEY) deben cambiarse en producción. En Render, SECRET_KEY se genera automáticamente y DATABASE_URL se proporciona desde el servicio de base de datos.
 
 ## 📊 Decisiones Técnicas
 

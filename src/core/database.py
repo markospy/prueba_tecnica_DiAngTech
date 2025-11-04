@@ -9,9 +9,9 @@ from src.models.models import Base
 async_database_url = os.getenv("ASYNC_DATABASE_URL")
 if not async_database_url:
     database_url = os.getenv("DATABASE_URL")
-    if database_url and database_url.startswith("postgresql://"):
+    if database_url and database_url.startswith("postgres://"):
         # Transformar postgresql:// a postgresql+asyncpg:// para asyncpg
-        async_database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        async_database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
     else:
         # Fallback a SQLite para desarrollo local
         async_database_url = "sqlite+aiosqlite:///database.sqlite3"

@@ -24,13 +24,15 @@ FROM python:3.12-slim AS runtime
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Crear usuario no root para seguridad
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser
 
 # Configurar variables de entorno
+# Variables de Python y sistema
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app"
+    PYTHONPATH="/app" \
+    UV_CACHE_DIR="/app/.cache/uv"
 
 # Crear directorio de trabajo
 WORKDIR /app
@@ -40,6 +42,9 @@ COPY --from=builder /app/.venv /app/.venv
 
 # Copiar código de la aplicación
 COPY --chown=appuser:appuser . .
+
+# Crear directorio de caché para uv con permisos correctos
+RUN mkdir -p /app/.cache/uv && chown -R appuser:appuser /app/.cache
 
 # Cambiar a usuario no root
 USER appuser
