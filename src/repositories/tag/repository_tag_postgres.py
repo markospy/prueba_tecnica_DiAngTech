@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from models.models import Tag
 from repositories.exceptions import RepositoryNotFoundException
@@ -52,10 +53,13 @@ class RepositoryTagPostgres(RepositoryBase):
 
     async def delete(self, id: int, user_id: int) -> None:
         result = await self.session.execute(
-            select(Tag).where(Tag.id == id, Tag.deleted_at.is_(None), Tag.user_id == user_id)
+            select(Tag)
+            .options(joinedload(Tag.posts))
+            .where(Tag.id == id, Tag.deleted_at.is_(None), Tag.user_id == user_id)
         )
         tag = result.unique().scalar_one_or_none()
         if not tag:
             raise RepositoryNotFoundException(f"Not found tag with id {id} for the user with id {user_id}")
         tag.soft_delete()
+        tag.posts.clear()
         await self.session.commit()
