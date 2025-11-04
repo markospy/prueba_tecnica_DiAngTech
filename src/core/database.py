@@ -7,14 +7,22 @@ from src.models.models import Base
 # Obtener la URL de la base de datos
 # Prioridad: ASYNC_DATABASE_URL > DATABASE_URL (transformada) > SQLite por defecto
 async_database_url = os.getenv("ASYNC_DATABASE_URL")
+
+# Si no hay ASYNC_DATABASE_URL, intentar con DATABASE_URL
 if not async_database_url:
-    database_url = os.getenv("DATABASE_URL")
-    if database_url and database_url.startswith("postgres://"):
-        # Transformar postgresql:// a postgresql+asyncpg:// para asyncpg
-        async_database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    else:
-        # Fallback a SQLite para desarrollo local
-        async_database_url = "sqlite+aiosqlite:///database.sqlite3"
+    async_database_url = os.getenv("DATABASE_URL")
+
+# Transformar la URL al formato correcto para asyncpg si es necesario
+if async_database_url:
+    if async_database_url.startswith("postgresql://"):
+        # Transformar postgresql:// a postgresql+asyncpg://
+        async_database_url = async_database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    elif async_database_url.startswith("postgres://"):
+        # Transformar postgres:// a postgresql+asyncpg://
+        async_database_url = async_database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+else:
+    # Fallback a SQLite para desarrollo local
+    async_database_url = "sqlite+aiosqlite:///database.sqlite3"
 
 ASYNC_DATABASE_URL = async_database_url
 
