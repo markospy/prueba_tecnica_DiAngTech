@@ -10,7 +10,6 @@ El despliegue lo realize en Render. Para esto es importante contar con los fiche
   - [Pendientes y mejoras posibles](#pendientes-y-mejoras-posibles)
 - [Preparar entorno virtual con uv (en linux) para desarrollo (sin docker)](#preparar-entorno-virtual-con-uv-en-linux-para-desarrollo-sin-docker)
 - [Desplegar API desde un contenedor de Docker](#desplegar-api-desde-un-contenedor-de-docker)
-- [Notas importantes](#notas-importantes)
 - [📊 Decisiones Técnicas](#-decisiones-técnicas)
 
 ## ✅ CHECKLIST FINAL
@@ -84,11 +83,6 @@ export ACCESS_TOKEN_EXPIRE_MINUTES=25200
 
 docker compose up
 ```
-
-## Notas importantes:
-En el dockerfile uso valores hardcodeados. Estos valores funcionan para desarrollo local. En producción (Render), se sobrescriben con las variables definidas en render.yaml o en el dashboard de Render.
-
-Seguridad: Los valores sensibles (como POSTGRES_PASSWORD y SECRET_KEY) deben cambiarse en producción. En Render, SECRET_KEY se genera automáticamente y DATABASE_URL se proporciona desde el servicio de base de datos.
 
 ## 📊 Decisiones Técnicas
 

@@ -1,57 +1,34 @@
-# Stage 1: Builder - Instalación de dependencias con uv
+# Stage 1: Builder - Instalación de dependencias
 FROM python:3.12-slim AS builder
 
-# Instalar uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-# Configurar variables de entorno para uv
-ENV UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
-
-# Crear directorio de trabajo
-WORKDIR /app
+WORKDIR /code
 
 # Copiar archivos de configuración de dependencias
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml /code/
 
-# Instalar dependencias del proyecto
-RUN uv sync --frozen --no-dev
+# Crear venv e instalar dependencias
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv/bin/pip install --no-cache-dir .
 
 # Stage 2: Runtime - Imagen final optimizada
 FROM python:3.12-slim AS runtime
 
-# Instalar solo uv runtime (más ligero)
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+WORKDIR /code
 
-# Crear usuario no root para seguridad
-RUN groupadd -r appuser && useradd -r -g appuser -m appuser
+# Copiar el venv desde el builder
+COPY --from=builder /opt/venv /opt/venv
 
 # Configurar variables de entorno
-# Variables de Python y sistema
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app" \
-    UV_CACHE_DIR="/app/.cache/uv"
-
-# Crear directorio de trabajo
-WORKDIR /app
-
-# Copiar el entorno virtual desde el builder
-COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 # Copiar código de la aplicación
-COPY --chown=appuser:appuser . .
-
-# Crear directorio de caché para uv con permisos correctos
-RUN mkdir -p /app/.cache/uv && chown -R appuser:appuser /app/.cache
-
-# Cambiar a usuario no root
-USER appuser
+COPY . /code/
 
 # Exponer puerto
 EXPOSE 10000
 
 # Comando por defecto
-CMD ["uv", "run", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "10000"]
-
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
