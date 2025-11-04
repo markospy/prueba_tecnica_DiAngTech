@@ -7,6 +7,8 @@ sqlalchemy==2.0.44
 aiosqlite==0.21.0
 alembic==1.17.1
 asyncpg==0.29.0
+psycopg2-binary==2.9.10
+greenlet==3.2.4
 
 # Validacion de datos
 pydantic==2.12.3
