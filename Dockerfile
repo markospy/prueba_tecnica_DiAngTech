@@ -3,6 +3,17 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /code
 
+# Instala las dependencias del sistema necesarias
+# 'libpq-dev' es crucial para compilar psycopg2/asyncpg
+# 'gcc' y 'musl-dev' son comunes si usas Alpine (pero 'slim' es Debian-based, así que 'gcc' puede ser necesario para compilación)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    gcc \
+    # Limpia para mantener la imagen pequeña
+    && rm -rf /var/lib/apt/lists/*
+
 # Copiar archivos de configuración de dependencias
 COPY pyproject.toml /code/
 
