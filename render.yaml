@@ -1,0 +1,35 @@
+services:
+  # Base de datos PostgreSQL
+  - type: pg
+    name: diangtech-db
+    plan: free
+    ipAllowList: []
+
+  # Servicio web de la aplicación
+  - type: web
+    name: diangtech-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      # URL de conexión a la base de datos PostgreSQL
+      # Render proporciona DATABASE_URL, la transformamos a asyncpg en el código
+      - key: DATABASE_URL
+        fromDatabase:
+          name: diangtech-db
+          property: connectionString
+
+      # Variables de seguridad
+      - key: SECRET_KEY
+        generateValue: true
+
+      - key: ALGORITHM
+        value: HS256
+
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "25200"
+
+    healthCheckPath: /docs
+    numInstances: 1
+

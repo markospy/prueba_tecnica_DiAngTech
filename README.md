@@ -63,9 +63,9 @@ export PYTHONPATH=$"{PYTHONPATH}:<URL A LA RAIZ DEL DIRECTORIO DEL PROYECTO>"
 ## Desplegar API desde un contenedor de Docker
 
 ```shell
-export POSTGRES_USER="miusuario"
+export POSTGRES_USER="diangtech_user"
 export POSTGRES_PASSWORD="miclave"
-export POSTGRES_DB="midb"
+export POSTGRES_DB="diangtech_db"
 export ASYNC_DATABASE_URL="postgresql+asyncpg://miusuario:miclave@db:5432/midb"
 export SECRET_KEY="0aa70dd7899111cd13c90ee18ac26318241c9457a14d1cef7e302abe4c259b99"
 export ALGORITHM="HS256"

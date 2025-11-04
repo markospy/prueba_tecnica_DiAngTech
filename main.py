@@ -2,6 +2,7 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.exception_handlers import register_repository_exception_handlers
 from src.api.routers.comment_router import comment_router
@@ -31,6 +32,17 @@ app = FastAPI(
 )
 
 register_repository_exception_handlers(app)
+
+# CORS Configuration
+CORS_CONFIG = {
+    "allow_origins": ["*"],
+    "allow_credentials": True,
+    "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["*"],
+    "max_age": 600,
+}
+
+app.add_middleware(CORSMiddleware, **CORS_CONFIG)
 
 
 @app.middleware("http")

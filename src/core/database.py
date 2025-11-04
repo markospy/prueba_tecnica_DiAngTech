@@ -4,7 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from src.models.models import Base
 
-ASYNC_DATABASE_URL = os.getenv("ASYNC_DATABASE_URL", "sqlite+aiosqlite:///database.sqlite3")
+# Obtener la URL de la base de datos
+# Prioridad: ASYNC_DATABASE_URL > DATABASE_URL (transformada) > SQLite por defecto
+async_database_url = os.getenv("ASYNC_DATABASE_URL")
+if not async_database_url:
+    database_url = os.getenv("DATABASE_URL")
+    if database_url and database_url.startswith("postgresql://"):
+        # Transformar postgresql:// a postgresql+asyncpg:// para asyncpg
+        async_database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    else:
+        # Fallback a SQLite para desarrollo local
+        async_database_url = "sqlite+aiosqlite:///database.sqlite3"
+
+ASYNC_DATABASE_URL = async_database_url
 
 async_engine = create_async_engine(ASYNC_DATABASE_URL, echo=False)
 
