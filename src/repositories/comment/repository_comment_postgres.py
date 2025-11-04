@@ -30,8 +30,8 @@ class RepositoryCommentPostgres(RepositoryBase):
             raise RepositoryNotFoundException("Comment", id)
         return comment
 
-    async def create(self, schema: CommentIn, user_id: int) -> Optional[Comment]:
-        comment = Comment(**schema.model_dump(), user_id=user_id, post_id=schema.post_id)
+    async def create(self, schema: CommentIn, user_id: int, post_id: int) -> Optional[Comment]:
+        comment = Comment(**schema.model_dump(), user_id=user_id, post_id=post_id)
         self.session.add(comment)
         await self.session.commit()
         await self.session.refresh(comment)
@@ -45,11 +45,12 @@ class RepositoryCommentPostgres(RepositoryBase):
         if not comment:
             raise RepositoryNotFoundException(f"Not found comment with id {id} for the user with id {user_id}")
         update_comment_data = schema.model_dump(exclude_unset=True)
-        update_comment = comment.model_copy(update=update_comment_data)
-        self.session.add(update_comment)
+        # Actualizar los atributos del comentario existente
+        for key, value in update_comment_data.items():
+            setattr(comment, key, value)
         await self.session.commit()
-        await self.session.refresh(update_comment)
-        return update_comment
+        await self.session.refresh(comment)
+        return comment
 
     async def delete(self, id: int, user_id: int) -> None:
         result = await self.session.execute(

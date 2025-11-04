@@ -10,7 +10,7 @@ class CommentBase(BaseModel):
 
 
 class CommentIn(CommentBase):
-    post_id: int
+    pass
 
 
 class CommentPut(BaseModel):

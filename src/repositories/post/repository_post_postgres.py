@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from models.models import Comment, Post, Tag
+from models.models import Post, Tag
 from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
 from repositories.repository_base import RepositoryBase
 from schemas.post import PostIn, PostPut
@@ -19,9 +19,7 @@ class RepositoryPostPostgres(RepositoryBase):
     async def get_all(self, page: int, size: int) -> tuple[List[Post], int]:
         skip = (page - 1) * size
         base_query = (
-            select(Post)
-            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
-            .where(Post.deleted_at.is_(None))
+            select(Post).options(joinedload(Post.user), joinedload(Post.tags)).where(Post.deleted_at.is_(None))
         )
 
         # Count
@@ -38,7 +36,7 @@ class RepositoryPostPostgres(RepositoryBase):
     async def get_by_id(self, id: int) -> Optional[Post]:
         result = await self.session.execute(
             select(Post)
-            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .options(joinedload(Post.user), joinedload(Post.tags))
             .where(Post.id == id, Post.deleted_at.is_(None))
         )
         post = result.unique().scalar_one_or_none()
@@ -49,7 +47,7 @@ class RepositoryPostPostgres(RepositoryBase):
     async def get_by_user_id(self, user_id: int) -> Optional[List[Post]]:
         result = await self.session.execute(
             select(Post)
-            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .options(joinedload(Post.user), joinedload(Post.tags))
             .where(Post.user_id == user_id, Post.deleted_at.is_(None))
         )
         posts = result.unique().scalars().all()
@@ -60,7 +58,7 @@ class RepositoryPostPostgres(RepositoryBase):
     async def get_by_tag(self, tag: str) -> Optional[List[Post]]:
         result = await self.session.execute(
             select(Post)
-            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .options(joinedload(Post.user), joinedload(Post.tags))
             .where(Tag.name.ilike(f"%{tag}%"), Post.deleted_at.is_(None))
         )
         posts = result.unique().scalars().all()
@@ -94,9 +92,7 @@ class RepositoryPostPostgres(RepositoryBase):
             await self.session.refresh(post, attribute_names=["id", "created_at", "updated_at"])
             # Recargar con las relaciones
             result = await self.session.execute(
-                select(Post)
-                .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
-                .where(Post.id == post.id)
+                select(Post).options(joinedload(Post.user), joinedload(Post.tags)).where(Post.id == post.id)
             )
             post = result.unique().scalar_one()
             return post
@@ -107,7 +103,7 @@ class RepositoryPostPostgres(RepositoryBase):
     async def update(self, id: int, schema: PostPut, user_id: int) -> Optional[Post]:
         result = await self.session.execute(
             select(Post)
-            .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
+            .options(joinedload(Post.user), joinedload(Post.tags))
             .where(Post.id == id, Post.deleted_at.is_(None), Post.user_id == user_id)
         )
         post = result.unique().scalar_one_or_none()
@@ -123,7 +119,8 @@ class RepositoryPostPostgres(RepositoryBase):
         if schema.tags is not None:
             tags = []
             for tag_name in schema.tags:
-                tag = await Tag.get_by_name(self.session, tag_name)
+                tag_result = await self.session.execute(select(Tag).where(Tag.name == tag_name))
+                tag = tag_result.unique().scalar()
                 if tag:
                     tags.append(tag)
                 else:
@@ -142,9 +139,7 @@ class RepositoryPostPostgres(RepositoryBase):
             await self.session.refresh(post, attribute_names=["updated_at"])
             # Recargar con las relaciones
             result = await self.session.execute(
-                select(Post)
-                .options(joinedload(Post.tags), joinedload(Post.comments).joinedload(Comment.user))
-                .where(Post.id == post.id)
+                select(Post).options(joinedload(Post.user), joinedload(Post.tags)).where(Post.id == post.id)
             )
             post = result.unique().scalar_one()
             return post

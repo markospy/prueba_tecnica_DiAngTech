@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from schemas.comment import CommentForPostOut
 from schemas.tags import TagForPostOut
 from schemas.user import UserForShowOut
 
@@ -28,7 +27,6 @@ class PostOut(PostBase):
     id: int
     user: UserForShowOut
     tags: Optional[List[TagForPostOut]] = None
-    comments: Optional[List[CommentForPostOut]] = None
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None = None

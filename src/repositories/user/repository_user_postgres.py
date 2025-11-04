@@ -23,7 +23,7 @@ class RepositoryUserPostgres(RepositoryBase):
         return result
 
     async def get_by_id(self, id: int) -> Optional[User]:
-        user = await User.get_by_id(self.session, id)
+        user = await self.session.get(User, id)
         if not user:
             raise RepositoryNotFoundException("User", id)
         return user
@@ -42,18 +42,19 @@ class RepositoryUserPostgres(RepositoryBase):
             raise RepositoryAlreadyExistsException("User", user.username)
 
     async def update(self, id: int, schema: UserPut) -> Optional[User]:
-        user: User | None = await User.get_by_id(self.session, id)
+        user: User | None = await self.session.get(User, id)
         if not user:
             raise RepositoryNotFoundException("User", id)
         update_user_data = schema.model_dump(exclude_unset=True)
-        update_user = user.model_copy(update=update_user_data)
-        self.session.add(update_user)
+        # Actualizar los atributos del usuario existente
+        for key, value in update_user_data.items():
+            setattr(user, key, value)
         await self.session.commit()
-        await self.session.refresh(update_user)
-        return update_user
+        await self.session.refresh(user)
+        return user
 
     async def delete(self, id: int) -> None:
-        user: User | None = await User.get_by_id(self.session, id)
+        user: User | None = await self.session.get(User, id)
         if not user:
             raise RepositoryNotFoundException("User", id)
         user.soft_delete()

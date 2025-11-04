@@ -43,11 +43,12 @@ class RepositoryTagPostgres(RepositoryBase):
         if not tag:
             raise RepositoryNotFoundException(f"Not found tag with id {id} for the user with id {user_id}")
         update_tag_data = schema.model_dump(exclude_unset=True)
-        update_tag = tag.model_copy(update=update_tag_data)
-        self.session.add(update_tag)
+        # Actualizar los atributos del tag existente
+        for key, value in update_tag_data.items():
+            setattr(tag, key, value)
         await self.session.commit()
-        await self.session.refresh(update_tag)
-        return update_tag
+        await self.session.refresh(tag)
+        return tag
 
     async def delete(self, id: int, user_id: int) -> None:
         result = await self.session.execute(
