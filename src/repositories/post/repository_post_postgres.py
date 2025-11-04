@@ -26,7 +26,7 @@ class RepositoryPostPostgres(RepositoryBase):
         count_query = select(func.count()).select_from(base_query.subquery())
         total = await self.session.scalar(count_query)
 
-        # Items
+        # Posts
         query = base_query.offset(skip).limit(size).order_by(Post.created_at.desc())
         result = await self.session.execute(query)
         posts = result.unique().scalars().all()

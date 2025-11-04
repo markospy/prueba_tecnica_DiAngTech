@@ -1,12 +1,14 @@
-from typing import Annotated, List
+import math
+from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.security import get_current_user
 from core.database import get_async_session
 from repositories.comment.repository_comment_postgres import RepositoryCommentPostgres
 from schemas.comment import CommentIn, CommentOut, CommentPut
+from schemas.pagination import PaginatedResponse
 from schemas.security import User
 from services.use_cases_comment import UseCasesComment
 
@@ -32,15 +34,27 @@ async def create_comment(
     return await use_cases_comment.create_comment(comment, current_user.id, post_id)
 
 
-@comment_router.get("/", response_model=List[CommentOut])
+@comment_router.get("/", response_model=PaginatedResponse[CommentOut])
 async def get_all_comments(
     post_id: int,
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
     use_cases_comment: UseCasesComment = Depends(get_use_cases_comment),
 ):
     """
-    Get all comments
+    Get all comments of one post
+
+    - **page**: Number of page (starts at 1)
+    - **size**: Number of items per page (maximum 100)
     """
-    return await use_cases_comment.get_all_comments(post_id)
+    comments, total = await use_cases_comment.get_all_comments(post_id)
+    return PaginatedResponse(
+        items=comments,
+        total=total,
+        page=page,
+        size=size,
+        pages=math.ceil(total / size) if total > 0 else 0,
+    )
 
 
 @comment_router.get("/{id}", response_model=CommentOut)

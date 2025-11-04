@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.models import Comment
@@ -14,14 +14,20 @@ class RepositoryCommentPostgres(RepositoryBase):
     def __init__(self, session: AsyncSession):
         super().__init__(session)
 
-    async def get_all(self, post_id: int) -> Optional[List[Comment]]:
-        result = await self.session.execute(
-            select(Comment).where(Comment.deleted_at.is_(None), Comment.post_id == post_id)
-        )
-        comments = result.unique().scalars().all()
-        if not comments:
-            raise RepositoryNotFoundException(f"No comments found for post with id {post_id}")
-        return comments
+    async def get_all(self, post_id: int, page: int, size: int) -> tuple[List[Comment], int]:
+        skip = (page - 1) * size
+        base_query = select(Comment).where(Comment.deleted_at.is_(None), Comment.post_id == post_id)
+
+        # Count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total = await self.session.scalar(count_query)
+
+        # Comments
+        query = base_query.offset(skip).limit(size).order_by(Comment.created_at.desc())
+        result = await self.session.execute(query)
+        posts = result.unique().scalars().all()
+
+        return posts, total
 
     async def get_by_id(self, id: int) -> Optional[Comment]:
         result = await self.session.execute(select(Comment).where(Comment.id == id, Comment.deleted_at.is_(None)))

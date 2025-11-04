@@ -45,10 +45,10 @@ async def get_all_posts(
     - **page**: Number of page (starts at 1)
     - **size**: Number of items per page (maximum 100)
     """
-    items, total = await use_cases_post.get_all_posts(page=page, size=size)
+    posts, total = await use_cases_post.get_all_posts(page=page, size=size)
 
     return PaginatedResponse(
-        items=items,
+        items=posts,
         total=total,
         page=page,
         size=size,
