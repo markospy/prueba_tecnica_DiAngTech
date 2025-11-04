@@ -3,7 +3,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
+from src.repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
 
 
 async def repository_not_found_handler(request: Request, exc: RepositoryNotFoundException):

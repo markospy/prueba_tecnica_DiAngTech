@@ -3,12 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.security import get_current_user
-from core.database import get_async_session
-from repositories.user.repository_user_postgres import RepositoryUserPostgres
-from schemas.security import User
-from schemas.user import UserOut, UserPut
-from services.use_cases_user import UseCasesUser
+from src.api.security import get_current_user
+from src.core.database import get_async_session
+from src.repositories.user.repository_user_postgres import RepositoryUserPostgres
+from src.schemas.security import User
+from src.schemas.user import UserOut, UserPut
+from src.services.use_cases_user import UseCasesUser
 
 user_router = APIRouter(prefix="/users", tags=["users"])
 

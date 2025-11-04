@@ -1,8 +1,8 @@
 from typing import List
 
-from models.models import Tag
-from repositories.repository_base import RepositoryBase
-from schemas.tags import TagIn, TagPut
+from src.models.models import Tag
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.tags import TagIn, TagPut
 
 
 class UseCasesTag:

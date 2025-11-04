@@ -54,6 +54,12 @@ export ACCESS_TOKEN_EXPIRE_MINUTES=25200
 fastapi dev  src/api/main.py
 ```
 
+Si tienes problema al ejecutar ```fastapi dev  src/api/main.py``` puede intentar correr el siguiente comando para agregar el directorio del proyecto al PYTHONPATH:
+
+```shell
+export PYTHONPATH=$"{PYTHONPATH}:<URL A LA RAIZ DEL DIRECTORIO DEL PROYECTO>"
+```
+
 ## Desplegar API desde un contenedor de Docker
 
 ```shell

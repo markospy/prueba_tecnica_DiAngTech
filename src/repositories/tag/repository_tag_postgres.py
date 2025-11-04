@@ -4,10 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from models.models import Tag
-from repositories.exceptions import RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.tags import TagIn, TagPut
+from src.models.models import Tag
+from src.repositories.exceptions import RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.tags import TagIn, TagPut
 
 
 class RepositoryTagPostgres(RepositoryBase):

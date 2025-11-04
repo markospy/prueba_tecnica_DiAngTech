@@ -1,8 +1,8 @@
 from typing import List
 
-from models.models import User
-from repositories.repository_base import RepositoryBase
-from schemas.user import UserIn, UserPut
+from src.models.models import User
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.user import UserIn, UserPut
 
 
 class UseCasesUser:

@@ -5,10 +5,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from models.models import Post, Tag
-from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.post import PostIn, PostPut
+from src.models.models import Post, Tag
+from src.repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.post import PostIn, PostPut
 
 
 class RepositoryPostPostgres(RepositoryBase):

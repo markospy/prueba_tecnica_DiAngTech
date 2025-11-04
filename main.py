@@ -3,13 +3,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
-from api.exception_handlers import register_repository_exception_handlers
-from api.routers.comment_router import comment_router
-from api.routers.post_router import post_router
-from api.routers.register_login import app_security
-from api.routers.tag_router import tag_router
-from api.routers.user_router import user_router
-from core.database import create_db_and_tables
+from src.api.exception_handlers import register_repository_exception_handlers
+from src.api.routers.comment_router import comment_router
+from src.api.routers.post_router import post_router
+from src.api.routers.register_login import app_security
+from src.api.routers.tag_router import tag_router
+from src.api.routers.user_router import user_router
+from src.core.database import create_db_and_tables
 
 
 @asynccontextmanager

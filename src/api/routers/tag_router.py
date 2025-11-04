@@ -3,12 +3,12 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.security import get_current_user
-from core.database import get_async_session
-from repositories.tag.repository_tag_postgres import RepositoryTagPostgres
-from schemas.security import User
-from schemas.tags import TagIn, TagOut
-from services.use_cases_tag import UseCasesTag
+from src.api.security import get_current_user
+from src.core.database import get_async_session
+from src.repositories.tag.repository_tag_postgres import RepositoryTagPostgres
+from src.schemas.security import User
+from src.schemas.tags import TagIn, TagOut
+from src.services.use_cases_tag import UseCasesTag
 
 tag_router = APIRouter(prefix="/tags", tags=["tags"])
 

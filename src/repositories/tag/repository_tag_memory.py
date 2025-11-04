@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from models.models import Tag
-from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.tags import TagIn, TagPut
+from src.models.models import Tag
+from src.repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.tags import TagIn, TagPut
 
 
 class RepositoryTagMemory(RepositoryBase):

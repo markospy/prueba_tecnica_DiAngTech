@@ -1,8 +1,8 @@
 from typing import List, Sequence
 
-from models.models import Post
-from repositories.repository_base import RepositoryBase
-from schemas.post import PostIn, PostPut
+from src.models.models import Post
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.post import PostIn, PostPut
 
 
 class UseCasesPost:

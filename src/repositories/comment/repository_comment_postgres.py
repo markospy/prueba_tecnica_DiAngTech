@@ -3,10 +3,10 @@ from typing import List, Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.models import Comment
-from repositories.exceptions import RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.comment import CommentIn, CommentPut
+from src.models.models import Comment
+from src.repositories.exceptions import RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.comment import CommentIn, CommentPut
 
 
 class RepositoryCommentPostgres(RepositoryBase):

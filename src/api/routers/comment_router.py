@@ -4,13 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.security import get_current_user
-from core.database import get_async_session
-from repositories.comment.repository_comment_postgres import RepositoryCommentPostgres
-from schemas.comment import CommentIn, CommentOut, CommentPut
-from schemas.pagination import PaginatedResponse
-from schemas.security import User
-from services.use_cases_comment import UseCasesComment
+from src.api.security import get_current_user
+from src.core.database import get_async_session
+from src.repositories.comment.repository_comment_postgres import RepositoryCommentPostgres
+from src.schemas.comment import CommentIn, CommentOut, CommentPut
+from src.schemas.pagination import PaginatedResponse
+from src.schemas.security import User
+from src.services.use_cases_comment import UseCasesComment
 
 comment_router = APIRouter(prefix="/comments", tags=["comments"])
 

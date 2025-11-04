@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from schemas.tags import TagForPostOut
-from schemas.user import UserForShowOut
+from src.schemas.tags import TagForPostOut
+from src.schemas.user import UserForShowOut
 
 
 class PostBase(BaseModel):

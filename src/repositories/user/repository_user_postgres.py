@@ -3,12 +3,12 @@ from typing import List, Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.security import get_by_username, get_password_hash, verify_password
-from models.models import User
-from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.security import UserInDB
-from schemas.user import UserIn, UserPut
+from src.api.security import get_by_username, get_password_hash, verify_password
+from src.models.models import User
+from src.repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.security import UserInDB
+from src.schemas.user import UserIn, UserPut
 
 
 class RepositoryUserPostgres(RepositoryBase):

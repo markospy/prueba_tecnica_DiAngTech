@@ -3,7 +3,7 @@ from typing import List, Literal
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from models.mixins import SoftDeleteMixin, TimestampMixin
+from src.models.mixins import SoftDeleteMixin, TimestampMixin
 
 JOINED_LOAD_RELATIONS = Literal[
     "tags",

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from schemas.user import UserForShowOut
+from src.schemas.user import UserForShowOut
 
 
 class CommentBase(BaseModel):

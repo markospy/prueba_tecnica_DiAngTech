@@ -4,11 +4,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security.oauth2 import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from api.routers.user_router import get_use_cases_user
-from api.security import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
-from schemas.security import Token
-from schemas.user import UserIn, UserOut
-from services.use_cases_user import UseCasesUser
+from src.api.routers.user_router import get_use_cases_user
+from src.api.security import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
+from src.schemas.security import Token
+from src.schemas.user import UserIn, UserOut
+from src.services.use_cases_user import UseCasesUser
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 

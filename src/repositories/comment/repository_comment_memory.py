@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from models.models import Comment
-from repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
-from repositories.repository_base import RepositoryBase
-from schemas.comment import CommentIn, CommentPut
+from src.models.models import Comment
+from src.repositories.exceptions import RepositoryAlreadyExistsException, RepositoryNotFoundException
+from src.repositories.repository_base import RepositoryBase
+from src.schemas.comment import CommentIn, CommentPut
 
 
 class RepositoryCommentMemory(RepositoryBase):

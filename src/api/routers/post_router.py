@@ -4,13 +4,13 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.security import get_current_user
-from core.database import get_async_session
-from repositories.post.repository_post_postgres import RepositoryPostPostgres
-from schemas.pagination import PaginatedResponse
-from schemas.post import PostIn, PostOut, PostPut
-from schemas.security import User
-from services.use_cases_post import UseCasesPost
+from src.api.security import get_current_user
+from src.core.database import get_async_session
+from src.repositories.post.repository_post_postgres import RepositoryPostPostgres
+from src.schemas.pagination import PaginatedResponse
+from src.schemas.post import PostIn, PostOut, PostPut
+from src.schemas.security import User
+from src.services.use_cases_post import UseCasesPost
 
 post_router = APIRouter(prefix="/posts", tags=["posts"])
 

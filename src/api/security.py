@@ -10,9 +10,9 @@ from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_async_session
-from models.models import User
-from schemas.security import TokenData, UserInDB
+from src.core.database import get_async_session
+from src.models.models import User
+from src.schemas.security import TokenData, UserInDB
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
