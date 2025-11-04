@@ -19,13 +19,13 @@ class RepositoryUserPostgres(RepositoryBase):
     async def get_all(self) -> Optional[List[User]]:
         result = await User.all_active(self.session)
         if not result:
-            raise RepositoryNotFoundException("User", "all")
+            raise RepositoryNotFoundException("Not found users")
         return result
 
     async def get_by_id(self, id: int) -> Optional[User]:
         user = await self.session.get(User, id)
         if not user:
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
         return user
 
     async def create(self, schema: UserIn) -> Optional[User]:
@@ -39,12 +39,12 @@ class RepositoryUserPostgres(RepositoryBase):
             return user
         except IntegrityError:
             await self.session.rollback()
-            raise RepositoryAlreadyExistsException("User", user.username)
+            raise RepositoryAlreadyExistsException(entity_name="User", name=user.username)
 
     async def update(self, id: int, schema: UserPut) -> Optional[User]:
         user: User | None = await self.session.get(User, id)
         if not user:
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
         update_user_data = schema.model_dump(exclude_unset=True)
         # Actualizar los atributos del usuario existente
         for key, value in update_user_data.items():
@@ -56,7 +56,7 @@ class RepositoryUserPostgres(RepositoryBase):
     async def delete(self, id: int) -> None:
         user: User | None = await self.session.get(User, id)
         if not user:
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
         user.soft_delete()
         await self.session.commit()
 

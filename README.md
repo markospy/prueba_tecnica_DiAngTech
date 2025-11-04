@@ -26,6 +26,10 @@ Para el despliegue si use docker, explicó los pasos que seguí.
 - ✅ Sistema de permisos (owner-only)
 - ✅ DECISIONS.md profesional
 
+### Pendientes y mejoras posibles
+- Actualizar tests unitarios y de integracion.
+- Crear tests de extremo a extremo para probar endpoints.
+
 ## Preparar entorno virtual con uv (en linux) para desarrollo (sin docker):
 
 ```shell

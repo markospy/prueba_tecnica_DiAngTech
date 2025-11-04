@@ -25,15 +25,17 @@ class RepositoryCommentPostgres(RepositoryBase):
         # Comments
         query = base_query.offset(skip).limit(size).order_by(Comment.created_at.desc())
         result = await self.session.execute(query)
-        posts = result.unique().scalars().all()
+        comment = result.unique().scalars().all()
 
-        return posts, total
+        if not comment:
+            raise RepositoryNotFoundException("Not found comment")
+        return comment, total
 
     async def get_by_id(self, id: int) -> Optional[Comment]:
         result = await self.session.execute(select(Comment).where(Comment.id == id, Comment.deleted_at.is_(None)))
         comment = result.unique().scalar_one_or_none()
         if not comment:
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(entity_name="Comment", id=id)
         return comment
 
     async def create(self, schema: CommentIn, user_id: int, post_id: int) -> Optional[Comment]:

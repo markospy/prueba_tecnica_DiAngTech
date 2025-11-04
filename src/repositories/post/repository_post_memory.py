@@ -18,13 +18,13 @@ class RepositoryPostMemory(RepositoryBase):
     async def get_by_id(self, id: int) -> Optional[Post]:
         post = self.posts.get(id)
         if not post:
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(entity_name="Post", id=id)
         return post
 
     async def create(self, post: PostIn) -> Optional[Post]:
         existing_post = await self.get_by_title(post.title)
         if existing_post:
-            raise RepositoryAlreadyExistsException("Post", post.title)
+            raise RepositoryAlreadyExistsException(entity_name="Post", name=post.title)
         post_in_dict = post.model_dump()
         post_in_dict["id"] = self.increment_id_counter()
         post_model = Post(**post_in_dict)
@@ -34,7 +34,7 @@ class RepositoryPostMemory(RepositoryBase):
     async def update(self, id: int, post: PostPut) -> Optional[Post]:
         stored_post = self.posts.get(id)
         if not stored_post:
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(entity_name="Post", id=id)
 
         # Actualizar los atributos del post existente
         update_data = post.model_dump(exclude_unset=True)
@@ -45,7 +45,7 @@ class RepositoryPostMemory(RepositoryBase):
 
     async def delete(self, id: int) -> None:
         if not self.posts.get(id):
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(entity_name="Post", id=id)
         self.posts[id].soft_delete()
 
     def increment_id_counter(self) -> int:

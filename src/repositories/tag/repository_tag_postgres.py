@@ -18,14 +18,14 @@ class RepositoryTagPostgres(RepositoryBase):
         result = await self.session.execute(select(Tag).where(Tag.deleted_at.is_(None)))
         tags = result.unique().scalars().all()
         if not tags:
-            raise RepositoryNotFoundException("Tag", "all")
+            raise RepositoryNotFoundException("Not found tags")
         return tags
 
     async def get_by_id(self, id: int) -> Optional[Tag]:
         result = await self.session.execute(select(Tag).where(Tag.id == id, Tag.deleted_at.is_(None)))
         tag = result.unique().scalar_one_or_none()
         if not tag:
-            raise RepositoryNotFoundException("Tag", id)
+            raise RepositoryNotFoundException(entity_name="Tag", id=id)
         return tag
 
     async def create(self, schema: TagIn, user_id: int) -> Optional[Tag]:

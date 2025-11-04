@@ -18,12 +18,12 @@ class RepositoryCommentMemory(RepositoryBase):
     async def get_by_id(self, id: int) -> Optional[Comment]:
         comment = self.comments.get(id)
         if not comment:
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(entity_name="Comment", id=id)
         return comment
 
     async def create(self, comment: CommentIn) -> Optional[Comment]:
         if self.get_by_content(comment.content):
-            raise RepositoryAlreadyExistsException("Comment", comment.content)
+            raise RepositoryAlreadyExistsException(entity_name="Comment", name=comment.content)
         comment_in_dict = comment.model_dump()
         comment_in_dict["id"] = self.increment_id_counter()
         comment_model = Comment(**comment_in_dict)
@@ -33,7 +33,7 @@ class RepositoryCommentMemory(RepositoryBase):
     async def update(self, id: int, comment: CommentPut) -> Optional[Comment]:
         stored_comment = self.comments.get(id)
         if not stored_comment:
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(entity_name="Comment", id=id)
 
         # Actualizar los atributos del comment existente
         update_data = comment.model_dump(exclude_unset=True)
@@ -44,7 +44,7 @@ class RepositoryCommentMemory(RepositoryBase):
 
     async def delete(self, id: int) -> None:
         if not self.comments.get(id):
-            raise RepositoryNotFoundException("Comment", id)
+            raise RepositoryNotFoundException(entity_name="Comment", id=id)
         self.comments[id].soft_delete()
 
     def increment_id_counter(self) -> int:

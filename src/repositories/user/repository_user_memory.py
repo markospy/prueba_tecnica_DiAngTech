@@ -18,13 +18,13 @@ class RepositoryUserMemory(RepositoryBase):
     async def get_by_id(self, id: int) -> Optional[User]:
         user = self.users.get(id)
         if not user:
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
         return user
 
     async def create(self, user: UserIn) -> Optional[User]:
         existing_user = await self.get_by_username(user.username)
         if existing_user:
-            raise RepositoryAlreadyExistsException("User", user.username)
+            raise RepositoryAlreadyExistsException(entity_name="User", name=user.username)
         user_in_dict = user.model_dump()
         user_in_dict["id"] = self.increment_id_counter()
         user_model = User(**user_in_dict)
@@ -34,7 +34,7 @@ class RepositoryUserMemory(RepositoryBase):
     async def update(self, id: int, user: UserPut) -> Optional[User]:
         stored_user = self.users.get(id)
         if not stored_user:
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
 
         # Actualizar los atributos del user existente
         update_data = user.model_dump(exclude_unset=True)
@@ -45,7 +45,7 @@ class RepositoryUserMemory(RepositoryBase):
 
     async def delete(self, id: int) -> None:
         if not self.users.get(id):
-            raise RepositoryNotFoundException("User", id)
+            raise RepositoryNotFoundException(entity_name="User", id=id)
         self.users[id].soft_delete()
 
     def increment_id_counter(self) -> int:

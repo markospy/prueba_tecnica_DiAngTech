@@ -18,12 +18,12 @@ class RepositoryTagMemory(RepositoryBase):
     async def get_by_id(self, id: int) -> Optional[Tag]:
         tag = self.tags.get(id)
         if not tag:
-            raise RepositoryNotFoundException("Tag", id)
+            raise RepositoryNotFoundException(entity_name="Tag", id=id)
         return tag
 
     async def create(self, tag: TagIn) -> Optional[Tag]:
         if self.get_by_name(tag.name):
-            raise RepositoryAlreadyExistsException("Tag", tag.name)
+            raise RepositoryAlreadyExistsException(entity_name="Tag", name=tag.name)
         tag_in_dict = tag.model_dump()
         tag_in_dict["id"] = self.increment_id_counter()
         tag_model = Tag(**tag_in_dict)
@@ -33,7 +33,7 @@ class RepositoryTagMemory(RepositoryBase):
     async def update(self, id: int, tag: TagPut) -> Optional[Tag]:
         stored_tag = self.tags.get(id)
         if not stored_tag:
-            raise RepositoryNotFoundException("Tag", id)
+            raise RepositoryNotFoundException(entity_name="Tag", id=id)
 
         # Actualizar los atributos del tag existente
         update_data = tag.model_dump(exclude_unset=True)
@@ -44,7 +44,7 @@ class RepositoryTagMemory(RepositoryBase):
 
     async def delete(self, id: int) -> None:
         if not self.tags.get(id):
-            raise RepositoryNotFoundException("Tag", id)
+            raise RepositoryNotFoundException(entity_name="Tag", id=id)
         self.tags[id].soft_delete()
 
     def increment_id_counter(self) -> int:

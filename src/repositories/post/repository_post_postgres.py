@@ -31,6 +31,9 @@ class RepositoryPostPostgres(RepositoryBase):
         result = await self.session.execute(query)
         posts = result.unique().scalars().all()
 
+        if not posts:
+            raise RepositoryNotFoundException("Not found posts")
+
         return posts, total
 
     async def get_by_id(self, id: int) -> Optional[Post]:
@@ -41,7 +44,7 @@ class RepositoryPostPostgres(RepositoryBase):
         )
         post = result.unique().scalar_one_or_none()
         if not post:
-            raise RepositoryNotFoundException("Post", id)
+            raise RepositoryNotFoundException(entity_name="Post", id=id)
         return post
 
     async def get_by_user_id(self, user_id: int) -> Optional[List[Post]]:
@@ -98,7 +101,7 @@ class RepositoryPostPostgres(RepositoryBase):
             return post
         except IntegrityError:
             await self.session.rollback()
-            raise RepositoryAlreadyExistsException("Post", post.title)
+            raise RepositoryAlreadyExistsException(entity_name="Post", name=post.title)
 
     async def update(self, id: int, schema: PostPut, user_id: int) -> Optional[Post]:
         result = await self.session.execute(
@@ -145,7 +148,7 @@ class RepositoryPostPostgres(RepositoryBase):
             return post
         except IntegrityError:
             await self.session.rollback()
-            raise RepositoryAlreadyExistsException("Post", post.title)
+            raise RepositoryAlreadyExistsException(entity_name="Post", name=post.title)
 
     async def delete(self, id: int, user_id: int) -> None:
         result = await self.session.execute(
