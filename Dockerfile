@@ -15,12 +15,12 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar archivos de configuración de dependencias
-COPY pyproject.toml /code/
+COPY requeriments.txt /code/
 
 # Crear venv e instalar dependencias
 RUN python -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/venv/bin/pip install --no-cache-dir .
+    /opt/venv/bin/pip install --no-cache-dir -r requeriments.txt
 
 # Stage 2: Runtime - Imagen final optimizada
 FROM python:3.12-slim AS runtime
