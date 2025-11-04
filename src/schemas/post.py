@@ -25,8 +25,9 @@ class PostPut(BaseModel):
 
 class PostOut(PostBase):
     id: int
-    user: UserForShowOut
+    author: UserForShowOut = Field(..., validation_alias="user")
     tags: Optional[List[TagForPostOut]] = None
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None = None
+
+    model_config = {"from_attributes": True, "populate_by_name": True}

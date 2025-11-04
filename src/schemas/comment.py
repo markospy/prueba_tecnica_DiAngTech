@@ -23,7 +23,6 @@ class CommentOut(CommentBase):
     post_id: int
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None = None
 
 
 class CommentForPostOut(BaseModel):
@@ -32,4 +31,3 @@ class CommentForPostOut(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None = None

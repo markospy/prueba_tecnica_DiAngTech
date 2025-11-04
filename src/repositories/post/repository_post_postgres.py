@@ -62,7 +62,7 @@ class RepositoryPostPostgres(RepositoryBase):
         result = await self.session.execute(
             select(Post)
             .options(joinedload(Post.user), joinedload(Post.tags))
-            .where(Tag.name.ilike(f"%{tag}%"), Post.deleted_at.is_(None))
+            .where(Post.tags.any(Tag.name == tag), Post.deleted_at.is_(None))
         )
         posts = result.unique().scalars().all()
         if not posts:
