@@ -27,6 +27,11 @@ FROM python:3.12-slim AS runtime
 
 WORKDIR /code
 
+# Instala la librería de runtime necesaria para que el driver funcione
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copiar el venv desde el builder
 COPY --from=builder /opt/venv /opt/venv
 
